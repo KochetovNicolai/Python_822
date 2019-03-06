@@ -9,8 +9,10 @@
 5. Ревью засчитано, если pull request смержен в master.
 
 #### Метериалы по работе с гитом
+0. [The simple guide](http://rogerdudler.github.io/git-guide/)
 1. [10-минутный туториал GitHub](https://guides.github.com/introduction/git-handbook/)
-2. [GitHub help](https://help.github.com)
-3. [Git Book](https://git-scm.com/book/en/v2)
-4. Google, Stack Overflow
-5. Пример с семинара.
+2  [LearnGitBranching](https://learngitbranching.js.org)
+3. [GitHub help](https://help.github.com)
+4. [Git Book](https://git-scm.com/book/en/v2)
+5. Google, Stack Overflow
+6. Пример с семинара
