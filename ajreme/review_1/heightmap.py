@@ -1,73 +1,90 @@
 import random
+import numpy
 
 
-class HeightMap(object):
+def HeightMap(map_power, random_state=None):
+    '''
+    Generate and save world of size 2**map_power.
+    Diamond square algorithm used.
+    randomstate - seed. None means random seed.
+    roughtness - shows the world UNflatness.
+    Returns size, map - size of heightmap and
+    heightmap.
+    '''
 
-    _K, _N, _map = None, None, None
-    _roughness = None
+    size = 2**map_power+1
+    map_arr = numpy.array([numpy.array([None]*(size)) for i in range(size)])
 
-    def __init__(self, K):
-        self._K, self._N = K, 2**K
-        self._map = [[None]*(2**K+1) for i in range(2**K+1)]
+    if random_state is not None:
+        random.seed(random_state)
 
-    def Map(self):
-        return self._map.copy()
+    map_arr[0][0] = random.uniform(-1.0, 1.0)
+    map_arr[0][size-1] = random.uniform(-1.0, 1.0)
+    map_arr[size-1][0] = random.uniform(-1.0, 1.0)
+    map_arr[size-1][size-1] = random.uniform(-1.0, 1.0)
 
-    def Size(self):
-        return self._N+1
+    def Get(edge_len, xList, yList):
+        '''
+        Private function.
+        xList and yList has a size of 4.
+        Returns average height + random noise,
+        that depends in roughness and size of
+        current subsquare edge len.
+        '''
 
-    def _Get(self, N, xList, yList):
         total, count = 0, 0
         for i in range(4):
-            if 0 <= xList[i] <= self._N and 0 <= yList[i] <= self._N:
-                total, count = total+(self._map[xList[i]][yList[i]]), count+1
-        return total/count + random.uniform(-N*self._roughness/self._N, \
-                                             N*self._roughness/self._N)
+            if 0 <= xList[i] < size and \
+               0 <= yList[i] < size:
+                total, count = total+(map_arr[xList[i]][yList[i]]), count+1
+        return total/count + random.uniform(-float(edge_len)/size,
+                                            float(edge_len)/size)
 
-    def _Normilize(self):
-        N, minVal, maxVal = 2**self._K+1, None, None
-        for i in range(N):
-            for j in range(N):
-                minVal = self._map[i][j] if minVal is None \
-                    or self._map[i][j] < minVal else minVal
-                maxVal = self._map[i][j] if maxVal is None \
-                    or self._map[i][j] > maxVal else maxVal
-        for i in range(N):
-            for j in range(N):
-                self._map[i][j] = (self._map[i][j]-minVal) / (maxVal-minVal)
+    def Normilize():
+        '''
+        Private function.
+        Normilize heightmap.
+        '''
 
-    def Generate(self, randomstate=None, roughness=4.0):
-        if randomstate is not None:
-            random.seed(randomstate)
-        self._roughness = roughness
+        minVal = min(map(min, map_arr))
+        maxVal = max(map(max, map_arr))
+        return numpy.vectorize(lambda x: (x-minVal) / (maxVal-minVal))(map_arr)
 
-        self._map[0][0] = random.uniform(-1.0, 1.0)
-        self._map[0][2**self._K] = random.uniform(-1.0, 1.0)
-        self._map[2**self._K][0] = random.uniform(-1.0, 1.0)
-        self._map[2**self._K][2**self._K] = random.uniform(-1.0, 1.0)
+    for s_map_power in range(map_power, 0, -1):
+        '''
+        Generating map. For every depth:
+        1) Diamond step
+        2) Square step 1
+        3) Square step 2
+        '''
 
-        for K in range(self._K, 0, -1):
-            N, sN = 2**K, 2**(K-1)
+        edge_len, s_edge_len = 2**s_map_power, 2**(s_map_power-1)
 
-            for i in range(2**(self._K-K)):
-                for j in range(2**(self._K-K)):
-                    self._map[i*N+sN][j*N+sN] = \
-                        self._Get(N, \
-                        (i*N, i*N, i*N+N, i*N+N), \
-                        (j*N, j*N+N, j*N+N, j*N))
+        for i in range(2**(map_power-s_map_power)):
+            for j in range(2**(map_power-s_map_power)):
+                map_arr[i*edge_len+s_edge_len][j*edge_len+s_edge_len] = \
+                    Get(edge_len,
+                        (i*edge_len, i*edge_len,
+                         i*edge_len+edge_len, i*edge_len+edge_len),
+                        (j*edge_len, j*edge_len+edge_len,
+                         j*edge_len+edge_len, j*edge_len))
 
-            for i in range(2**(self._K-K)+1):
-                for j in range(2**(self._K-K)):
-                    self._map[i*N][j*N+sN] = \
-                        self._Get(N, \
-                        (i*N, i*N-sN, i*N, i*N+sN), \
-                        (j*N, j*N+sN, j*N+N, j*N+sN))
+        for i in range(2**(map_power-s_map_power)+1):
+            for j in range(2**(map_power-s_map_power)):
+                map_arr[i*edge_len][j*edge_len+s_edge_len] = \
+                    Get(edge_len,
+                        (i*edge_len, i*edge_len-s_edge_len,
+                         i*edge_len, i*edge_len+s_edge_len),
+                        (j*edge_len, j*edge_len+s_edge_len,
+                         j*edge_len+edge_len, j*edge_len+s_edge_len))
 
-            for i in range(2**(self._K-K)):
-                for j in range(2**(self._K-K)+1):
-                    self._map[i*N+sN][j*N] = \
-                        self._Get(N, \
-                        (i*N+sN, i*N, i*N+sN, i*N+N), \
-                        (j*N-sN, j*N, j*N+sN, j*N))
+        for i in range(2**(map_power-s_map_power)):
+            for j in range(2**(map_power-s_map_power)+1):
+                map_arr[i*edge_len+s_edge_len][j*edge_len] = \
+                    Get(edge_len,
+                        (i*edge_len+s_edge_len, i*edge_len,
+                         i*edge_len+s_edge_len, i*edge_len+edge_len),
+                        (j*edge_len-s_edge_len, j*edge_len,
+                         j*edge_len+s_edge_len, j*edge_len))
 
-        self._Normilize()
+    return Normilize()

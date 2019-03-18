@@ -1,58 +1,99 @@
 import pandas
 import numpy
+from PIL import Image
 from heightmap import HeightMap
 
 
 def StdBiomeTable():
-    return [[(233, 221, 199), (196, 212, 170), (169, 204, 164), \
-             (169, 204, 164), (156, 187, 169), (156, 187, 169)], \
-            [(228, 232, 202), (196, 212, 170), (196, 212, 170), \
-             (180, 201, 169), (180, 201, 169), (164, 196, 168)], \
-            [(228, 232, 202), (228, 232, 202), (196, 204, 187), \
-             (196, 204, 187), (204, 212, 187), (204, 212, 187)], \
-            [(153, 153, 153), (187, 187, 187), (221, 221, 187), \
-             (255, 255, 255), (255, 255, 255), (255, 255, 255)]]
+    '''
+    Returns build-in Biome Table
+    https://hsto.org/storage/694bf417/2bd7e8fe/47ea1f86/057bf768.png
+    Rows - height level
+    Columns - humid level
+    Second arg - water color
+    '''
+
+    return [[(233, 221, 199), (196, 212, 170), (169, 204, 164),
+             (169, 204, 164), (156, 187, 169), (156, 187, 169)],
+            [(228, 232, 202), (196, 212, 170), (196, 212, 170),
+             (180, 201, 169), (180, 201, 169), (164, 196, 168)],
+            [(228, 232, 202), (228, 232, 202), (196, 204, 187),
+             (196, 204, 187), (204, 212, 187), (204, 212, 187)],
+            [(153, 153, 153), (187, 187, 187), (221, 221, 187),
+             (255, 255, 255), (255, 255, 255), (255, 255, 255)]], \
+        (70, 130, 180)
 
 
-def LoadBiomeTable(biomeTableName=None):
-    if biomeTableName is None:
+def LoadBiomeTable(biome_table_name=None):
+    '''
+    Read and return Biome table from .csv
+    biomeTableName - name of .csv (example: ex.csv)
+    Rows - height level
+    Columns - humid level
+    Second arg - water colors
+    '''
+
+    if biome_table_name is None:
         return StdBiomeTable()
-    else:
-        biomeTable = numpy.array(pandas.read_csv('biome-table.csv'))
-        for i in range(biomeTable.shape[0]):
-            for j in range(biomeTable.shape[1]):
-                biomeTable[i][j] = tuple(map(int, biomeTable[i][j].split()))
-        return biomeTable
+
+    biome_table = numpy.array(pandas.read_csv(biome_table_name, header=None))
+    return [[tuple(map(int, j.split())) for j in i] for i in biome_table[:-1]],\
+            tuple(map(int, biome_table[-1][0].split()))
 
 
-def MakeWorldRGB(N, M, seed=None, physRoughtness=4.0, humidRoughtness=4.0, \
-                 seaLevel=0.45, biomeTableName=None):
+def TwoPower(N):
     K = 0
-    while 2**K+1 < N or 2**K+1 < M:
+    while 2**K+1 < N:
         K += 1
+    return K
 
-    physMap = HeightMap(K)
-    physMap.Generate(seed, physRoughtness)
-    physMap = physMap.Map()
 
-    humidMap = HeightMap(K)
-    humidMap.Generate(None if seed is None else seed+1, humidRoughtness)
-    humidMap = humidMap.Map()
+def CreateWorldRGB(N, M, seed=None, sea_level=0.45, biome_table_name=None):
+    '''
+    Create two heightmaps and return RGB 2D-matrix.
+    seed - world seed. None if random.
+    sea_level - limit of water.
+    biome_table_name - name of .csv file with colors
+    '''
 
-    biomeTable = LoadBiomeTable(biomeTableName)
+    map_power = max(TwoPower(N), TwoPower(M))
 
-    RGBMap = [[None]*(2**K+1) for i in range(2**K+1)]
+    phys_map = HeightMap(map_power, seed)
+    humid_map = HeightMap(map_power, None if seed is None else seed+1)
+    biome_table, water_color = LoadBiomeTable(biome_table_name)
+
+    RGB_map = [[None]*M for i in range(N)]
     for i in range(N):
         for j in range(M):
-            if physMap[i][j] < seaLevel:
-                RGBMap[i][j] = (70, 130, 180)
+            if phys_map[i][j] < sea_level or sea_level == 1.0:
+                RGB_map[i][j] = water_color
             else:
-                physLevel = int((physMap[i][j]-seaLevel) / (1-seaLevel) * \
-                                (len(biomeTable)-1))
-                humidLevel = int(humidMap[i][j]*(len(biomeTable[0])-1))
-                RGBMap[i][j] = biomeTable[physLevel][humidLevel]
+                phys_level = int((phys_map[i][j]-sea_level) / (1-sea_level) *
+                                 (len(biome_table)-1))
+                humid_level = int(humid_map[i][j]*len(biome_table[0]))
+                humid_level -= humid_level == len(biome_table[0])
+                RGB_map[i][j] = biome_table[phys_level][humid_level]
 
-    for i in range(len(RGBMap)):
-        RGBMap[i] = RGBMap[i][:M]
+    return RGB_map
 
-    return RGBMap[:N]
+
+def CreateWorld(N, M, seed=None, sea_level=0.45, biome_table_name=None):
+    '''
+    Create world with PIL.
+    N - width.
+    M - length.
+    sea_level - level of sea.
+    biome_table_name - name of .csv with colors
+    '''
+
+    image = CreateWorldRGB(N, M, seed, sea_level, biome_table_name)
+
+    N, M = len(image), len(image[0])
+    img = Image.new('RGB', (N, M))
+    pixels = img.load()
+
+    for i in range(N):
+        for j in range(M):
+            pixels[i, j] = image[i][j]
+
+    img.show()
