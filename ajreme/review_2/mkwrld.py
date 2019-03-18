@@ -36,8 +36,10 @@ def LoadBiomeTable(biome_table_name=None):
     if biome_table_name is None:
         return StdBiomeTable()
 
-    biome_table = numpy.array(pandas.read_csv(biome_table_name))
-    return numpy.vectorize(lambda x: tuple(map(int, x.split())))(biome_table)
+    biome_table = numpy.array(pandas.read_csv(biome_table_name, header=None))
+    print(biome_table[-1][0])
+    return [[tuple(map(int, j.split())) for j in i] for i in biome_table[:-1]],\
+            tuple(map(int, biome_table[-1][0].split()))
 
 
 def TwoPower(N):
