@@ -2,17 +2,17 @@ from tkinter import *
 
 score = 0
 
-def updateScoreSpace(event): #обновление очков при нажатии пробела
+def updateScoreSpace(event):
     global score
     score += 1
     scoreLabel.config(text="Очки:  {}".format(score))
 
-def updateScore(): #обновлние очков при нажатии на печеньку
+def updateScore(): 
     global score
     score += 1
     scoreLabel.config(text="Очки:  {}".format(score))
 
-def get_autoClicker(n): #проверяем хватает ли очков для покупки автоклика
+def get_autoClicker(n):
     global score
     if n == 1:
         if score >= 20:
@@ -45,7 +45,7 @@ def get_autoClicker(n): #проверяем хватает ли очков дл�
         else:
             pass
 
-def autoClicker(n): #автокликер
+def autoClicker(n):
     global score
     score += n
     scoreLabel.config(text="Очки:  {}".format(score))
@@ -56,11 +56,11 @@ root.title("Кликер")
 root.geometry("1000x600")
 root.configure(background='#eafffa')
 
-lowFrame = Frame(root) #создаем контейнер для магазина
+lowFrame = Frame(root) 
 
 canvas = Canvas(lowFrame, width=250, height=400, background='#eafffa')
 frame = Frame(canvas)
-myscrollbar = Scrollbar(lowFrame, orient = 'vertical', command = canvas.yview) #добаляем скролбар
+myscrollbar = Scrollbar(lowFrame, orient = 'vertical', command = canvas.yview)
 canvas.configure(yscrollcommand = myscrollbar.set)
 
 canvas.create_window((0,0), window = frame)
@@ -96,7 +96,7 @@ cursor3 = Button(frame, image=button3, bd=0, background='#eafffa', command=lambd
 cursor4 = Button(frame, image=button4, bd=0, background='#eafffa', command=lambda: get_autoClicker(10))
 cursor5 = Button(frame, image=button5, bd=0, background='#eafffa', command=lambda: get_autoClicker(30))
 
-root.bind('<space>', updateScoreSpace) #обновление очков при нажатии на пробел
+root.bind('<space>', updateScoreSpace) 
 
 lowFrame.pack(side = 'right')
 myscrollbar.pack(side = 'right', fill = Y)
