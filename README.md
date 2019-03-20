@@ -8,7 +8,7 @@
 4. Дождитесь результатов проверки, внесите необходимые исправления. (Данный шаг может занимать несколько итераций).
 5. Ревью засчитано, если pull request смержен в master.
 
-#### Метериалы по работе с гитом
+#### Мaтериалы по работе с гитом
 0. [The simple guide](http://rogerdudler.github.io/git-guide/)
 1. [10-минутный туториал GitHub](https://guides.github.com/introduction/git-handbook/)
 2.  [LearnGitBranching](https://learngitbranching.js.org)
