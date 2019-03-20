@@ -1,1 +1,1 @@
-﻿"Clicer" Run main.py
+﻿"Clicker" Run main.py
