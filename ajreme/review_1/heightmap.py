@@ -7,13 +7,10 @@ def HeightMap(map_power, random_state=None):
     Generate and save world of size 2**map_power.
     Diamond square algorithm used.
     randomstate - seed. None means random seed.
-    roughtness - shows the world UNflatness.
-    Returns size, map - size of heightmap and
-    heightmap.
     '''
 
     size = 2**map_power+1
-    map_arr = numpy.array([numpy.array([None]*(size)) for i in range(size)])
+    map_arr = numpy.empty([size, size])
 
     if random_state is not None:
         random.seed(random_state)
@@ -24,13 +21,9 @@ def HeightMap(map_power, random_state=None):
     map_arr[size-1][size-1] = random.uniform(-1.0, 1.0)
 
     def Get(edge_len, xList, yList):
-        '''
-        Private function.
-        xList and yList has a size of 4.
-        Returns average height + random noise,
-        that depends in roughness and size of
-        current subsquare edge len.
-        '''
+        # Returns average height + random noise,
+        # that depends in roughness and size of
+        # current subsquare edge length.
 
         total, count = 0, 0
         for i in range(4):
@@ -41,21 +34,43 @@ def HeightMap(map_power, random_state=None):
                                             float(edge_len)/size)
 
     def Normilize():
-        '''
-        Private function.
-        Normilize heightmap.
-        '''
+        # Normilize heightmap.
 
-        minVal = min(map(min, map_arr))
-        maxVal = max(map(max, map_arr))
-        return numpy.vectorize(lambda x: (x-minVal) / (maxVal-minVal))(map_arr)
+        minVal = numpy.amin(map_arr)
+        maxVal = numpy.amax(map_arr)
+        return (map_arr-minVal) / (maxVal-minVal)
 
     for s_map_power in range(map_power, 0, -1):
         '''
-        Generating map. For every depth:
-        1) Diamond step
-        2) Square step 1
-        3) Square step 2
+        Generating map. s_map_power - len of smaller current square.
+        X - ready values
+        1 - current step values
+        0 - not considered values
+        Example of second step:
+        1)  Diamond step
+            X 0 X 0 X
+            0 1 0 1 0
+            X 0 X 0 X
+            0 1 0 1 0
+            X 0 X 0 X
+        2)  Square step 1
+            X 0 X 0 X
+            1 X 1 X 1
+            X 0 X 0 X
+            1 X 1 X 1
+            X 0 X 0 X
+        3)  Square step 2
+            X 1 X 1 X
+            X X X X X
+            X 1 X 1 X
+            X X X X X
+            X 1 X 1 X
+        4)  Finally
+            X X X X X
+            X X X X X
+            X X X X X
+            X X X X X
+            X X X X X
         '''
 
         edge_len, s_edge_len = 2**s_map_power, 2**(s_map_power-1)
