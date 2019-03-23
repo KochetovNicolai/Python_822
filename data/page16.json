@@ -1,0 +1,25 @@
+{
+   "name"       : "16",
+   "text"       : "Так. Пять минут. Надо принять максимально адекватный вид.",
+   "quest_type" : 1,
+   "answers"    : [
+     {
+       "text"            :  "Полежать на кровати",
+       "req_lvl"         : [1, 2],
+       "next_page_name"  :  "17",
+       "next_lvl"        : 1
+     },
+     {
+       "text"            :  "Подойти к зеркалу",
+       "req_lvl"         : [1],
+       "next_page_name"  :  "18",
+       "next_lvl"        : 2
+     },
+     {
+       "text"            :  "Понюхать цветы",
+       "req_lvl"         : [2],
+       "next_page_name"  :  "20",
+       "next_lvl"        : 1
+     }
+   ]
+}
