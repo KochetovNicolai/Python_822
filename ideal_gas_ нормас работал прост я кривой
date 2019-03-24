@@ -1,0 +1,410 @@
+import math
+from random import *
+from tkinter import *
+import time
+
+QTY = int(150);
+DT = float(0.05);
+IRADIUS = float(5);
+IVX = float(30);
+IVY = float(30);
+ELEVEL1 = int(100);
+IMASS = float(1);
+GRAPH = QTY *11
+
+ScreenSize = 500
+root = Tk()
+canvas = Canvas(root, width=500, height=500)
+canvas.pack()
+
+
+
+class Particle:
+
+    def __init__(self, x, y, zoom, vx, vy, size, mass, internal_energy, Elevel, Color):
+        self.x_ = float(x)
+        self.y_ = float(y)
+        self.zoom_ = float(zoom)
+        self.vx_ = float(vx)
+        self.vy_ = float(vy)
+        self.mass_ = float(mass)
+        self.size_ = float(size)
+        self.internal_energy_ = float(internal_energy)
+        self.Elevel_ = int(Elevel)
+        self.Color_ = str(Color)
+
+    def Draw():
+        printf("Particles::draw")
+
+    def PhysicalMove(ScreenSize, shift):
+        printf("Particle::PhysicalMove")
+
+    def Hit(self, p2):
+        a = self.x_ - p2.x_
+        b = self.y_ - p2.y_
+
+        dist = math.sqrt(a * a + b * b)
+
+        if dist == 0:
+            dist=0.1;
+
+        cosA1 = b / dist
+        cosA2 = a / dist
+
+        if dist <= self.size_ + p2.size_:
+            HitEnergy = (self.mass_ / 2) * (((self.vx_ * cosA1) * (self.vx_ * cosA1)) + ((self.vy_ * cosA2) * (self.vy_ * cosA2))) + (p2.mass_ / 2) * ((p2.vx_ * cosA1 * p2.vx_ * cosA1) + (p2.vy_ * cosA2 * p2.vy_ * cosA2));
+
+            if HitEnergy >= self.Elevel_ and HitEnergy >= p2.Elevel_:
+
+
+                if self.mass_ > 1 and p2.mass_ > 1 :
+
+
+                    k = self.mass_ + p2.mass_
+                    TotalEnergy = (self.mass_ * (self.vx_ * self.vx_ + self.vy_ * self.vy_) + p2.mass_ * (p2.vx_ * p2.vx_ + p2.vy_ * p2.vy_)) / 2;
+                    TotalEnergy += self.internal_energy_;
+                    TotalEnergy += p2.internal_energy_;
+
+                    self.internal_energy_ = 0;
+                    p2.internal_energy_ = 0;
+                    Vel = float(math.sqrt( 2 * TotalEnergy / k))
+                    self.vx_ = Vel;
+                    return k;
+
+
+
+                else:
+
+
+
+                    d1 = (self.mass_ * (self.vx_ * self.vx_ + self.vy_ * self.vy_) + p2.mass_ * (p2.vx_ * p2.vx_ + p2.vy_ * p2.vy_)) / 2
+
+                    self.vx_ = (self.mass_ * self.vx_ + p2.mass_ * p2.vx_) / (self.mass_ + p2.mass_)
+                    self.vy_ = (self.mass_ * self.vy_ + p2.mass_ * p2.vy_) / (self.mass_ + p2.mass_)
+                    self.mass_ += p2.mass_;
+
+
+                    d2 = self.mass_ * (self.vx_ * self.vx_ + self.vy_ * self.vy_) / 2;
+                    self.internal_energy_ += d1 - d2 + p2.internal_energy_;
+
+                    self.Elevel_ = self.Elevel_ * 1.5;
+                    return -1;
+
+
+
+
+
+            else:
+
+                temp1 = cosA1 * cosA2;
+                temp2 = cosA2 * cosA2;
+                temp3 = cosA1 * cosA1;
+                d1 = (self.vy_ * temp1) + (self.vx_ * temp2) - (p2.vy_ * temp1) - (p2.vx_ * temp2);
+                d2 = (self.vx_ * temp1) + (self.vy_ * temp3) - (p2.vx_ * temp1) - (p2.vy_ * temp3);
+
+                self.vx_ = self.vx_ - d1 * (2 * p2.mass_ / (self.mass_ + p2.mass_));
+                self.vy_ = self.vy_ - d2 * (2 * p2.mass_ / (self.mass_ + p2.mass_));
+
+                p2.vx_ = p2.vx_ + d1 * (2 * self.mass_ / (self.mass_ + p2.mass_));
+                p2.vy_ = p2.vy_ + d2 * (2 * self.mass_ / (self.mass_ + p2.mass_));
+
+                temp3 = (self.size_ + p2.size_ - dist) / 2;
+                temp1 = temp3 * cosA2;
+                temp2 = temp3 * cosA1;
+
+                self.x_ = self.x_ + temp1;
+                self.y_ = self.y_ + temp2;
+                p2.x_ = p2.x_ - temp1;
+                p2.y_ = p2.y_ - temp2;
+
+                return 0
+            return 0
+        return 0
+
+
+
+class Circle(Particle):
+
+    def __init__(self, x, y, zoom, vx, vy, size, mass, internal_energy, Elevel, Color):
+        self.x_ = float(x)
+        self.y_ = float(y)
+        self.zoom_ = float(zoom)
+        self.vx_ = float(vx)
+        self.vy_ = float(vy)
+        self.mass_ = float(mass)
+        self.size_ = float(size)
+        self.internal_energy_ = float(internal_energy)
+        self.Elevel_ = int(Elevel)
+        self.Color_ = str(Color)
+
+    def Draw(self):
+        canvas.create_oval(self.x_, self.y_, self.x_ + self.size_ * self.zoom_, self.y_ + self.size_ * self.zoom_,
+                           fill=self.Color_)
+
+
+    def PhysicalMove(self, ScreenSize, shift):
+
+        self.x_ += self.vx_ * DT;
+        self.y_ += self.vy_ * DT;
+        Action_Size = ScreenSize - shift;
+
+        if self.x_ >= Action_Size - self.size_:
+            self.vx_ = -  self.vx_
+            self.x_ = Action_Size - self.size_
+
+        if self.y_ >= ScreenSize - self.size_:
+            self.vy_ = -  self.vy_
+            self.y_ = ScreenSize - self.size_
+
+        if self.x_ <= 0 + self.size_:
+            self.vx_ = - self.vx_
+            self.x_ = 0 + self.size_
+
+        if self.y_ <= 0 + self.size_:
+            self.vy_ = - self.vy_
+            self.y_ = 0 + self.size_
+
+
+class Square(Particle):
+
+    def __init__(self, x, y, zoom, vx, vy, size, mass, internal_energy, Elevel, Color):
+        self.x_ = float(x)
+        self.y_ = float(y)
+        self.zoom_ = float(zoom)
+        self.vx_ = float(vx)
+        self.vy_ = float(vy)
+        self.mass_ = float(mass)
+        self.size_ = float(size)
+        self.internal_energy_ = float(internal_energy)
+        self.Elevel_ = int(Elevel)
+        self.Color_ = str(Color)
+
+    def Draw(self):
+        canvas.create_rectangle((self.x_ - self.size_) * self.zoom_, (self.y_ + self.size_) * self.zoom_,
+                                (self.x_ + self.size_) * self.zoom_, (self.y_ - self.size_) * self.zoom_,
+                                fill=self.Color_)
+
+
+    def PhysicalMove(self, ScreenSize, shift):
+        self.x_ += self.vx_ * DT;
+        self.y_ += self.vy_ * DT;
+        Action_Size = ScreenSize - shift;
+
+        if self.x_ >= Action_Size - self.size_:
+            self.vx_ = -  self.vx_
+            self.x_ = Action_Size - self.size_
+
+        if self.y_ >= ScreenSize - self.size_:
+            self.vy_ = -  self.vy_
+            self.y_ = ScreenSize - self.size_
+
+        if self.x_ <= 0 + self.size_:
+            self.vx_ = - self.vx_
+            self.x_ = 0 + self.size_
+
+        if self.y_ <= 0 + self.size_:
+            self.vy_ = - self.vy_
+            self.y_ = 0 + self.size_
+
+
+class Manager:
+
+    def __init__(self, qty):
+        self.qty_ = int(qty)
+        self.obj = [0] * (QTY + QTY)
+
+    def Run(self):
+        change = int(0)
+        shift = int(0)
+        Size = int(50)
+        kin_energy_means = [0] * Size
+        int_energy_means = [0] * Size
+
+        number = 0
+        while number < 10000:
+
+            Q_Sort(self.obj, 1, self.qty_ - 1, self.qty_ - 1);
+            i = int(0)
+            while i < 100000:
+
+                k = int(i + 1)
+                while k < self.qty_:
+
+                    int(self.obj[i].Elevel_)
+                    change = int(self.obj[i].Hit(self.obj[k]))
+
+                    if change == -1:
+
+                        self.Sliyanie(i, k)
+                        i = -1
+                        k = self.qty_
+
+                    if change > 3:
+                        self.Explosion(i, k, change)
+                        i = -1
+                        k = self.qty_
+
+                    k += 1
+
+                i += 1
+
+            change = 0;
+            root.update()
+            self.DrawGraph(shift, number, Size, kin_energy_means, int_energy_means);
+
+            number += 1
+
+    def Sliyanie(self, i, k):
+        int(self.obj[i].Elevel_)
+        self.obj[k] = Square(self.obj[i].x_, self.obj[i].y_, self.obj[i].zoom_, self.obj[i].vx_, self.obj[i].vy_,self.obj[i].size_, self.obj[i].mass_, self.obj[i].internal_energy_, self.obj[i].Elevel_, self.obj[i].Color_);
+
+        self.obj[i] = self.obj[k]
+        self.obj[k] = self.obj[self.qty_ - 1]
+        self.qty_ -= 1
+        k = self.qty_
+
+    def Explosion(self, i, k, change):
+        Vel = self.obj[i].vx_;
+        m = self.qty_
+        while m - self.qty_ < change:
+            newAngle = randint(0, 7);
+            newVx = Vel * math.sin(newAngle);
+            newVy = Vel * math.cos(newAngle);
+            colors = choice(['red', 'green', 'blue', 'cyan', 'yellow', 'magenta'])
+            self.obj[m] = Circle(self.obj[i].x_ + 1.5 * IRADIUS * math.sin(newAngle),
+                                 self.obj[i].y_ + 1.5 * IRADIUS * math.cos(newAngle), 1, newVx, newVy, IRADIUS, IMASS,
+                                 0, ELEVEL1, colors);
+
+            m += 1
+
+        self.obj[i] = self.obj[self.qty_ + change - 2];
+        self.obj[k] = self.obj[self.qty_ + change - 1];
+
+        self.qty_ += change - 2;
+
+        k = self.qty_ - 1
+        i = k
+
+    def DrawGraph(self, shift, number, Size, kin_energy_means, int_energy_means):
+
+        canvas.delete("all")
+        canvas.create_line(0, 400, 800, 400)
+        canvas.create_line(0, 500, 800, 500)
+        canvas.create_line(800 - shift, 0, 800 - shift, 800)
+        kin_energy = float(0)
+        int_energy = float(0)
+
+        i = 0
+        while i < self.qty_:
+            kin_energy += self.obj[i].mass_ * (self.obj[i].vx_ * self.obj[i].vx_ + self.obj[i].vy_ * self.obj[i].vy_) / 2;
+            int_energy += self.obj[i].internal_energy_;
+            Draw_obj(self.obj[i], shift)
+            i += 1
+
+        if number > Size - 1:
+
+            i = 0
+            while i < Size - 1:
+
+                kin_energy_means[i] = kin_energy_means[i+1]
+                int_energy_means[i] = int_energy_means[i+1]
+                i += 1
+
+            number = Size - 1
+
+
+        kin_energy_means[number] = kin_energy
+        int_energy_means[number] = int_energy
+
+
+        x = 0;
+
+        Step = 20;
+
+
+        for i in range(Size-1):
+
+            y = 500 - kin_energy_means[i] / GRAPH - int_energy_means[i] / GRAPH;
+            y1 = 500 - kin_energy_means[i + 1] / GRAPH - int_energy_means[i + 1] / GRAPH;
+
+            canvas.create_line(x, 500 - kin_energy_means[i] / GRAPH, x + Step, 500 - kin_energy_means[i + 1] / GRAPH, fill = 'blue')
+
+            canvas.create_line(x, 500 - int_energy_means[i] / GRAPH, x + Step, 500 - int_energy_means[i + 1] / GRAPH, fill = 'red')
+
+            canvas.create_line(x, y, x + Step, y1, fill = 'yellow');
+
+            if i % 5 == 0:
+
+                canvas.create_text(x, 950 - kin_energy_means[i] / GRAPH, anchor=W, font="Purisa",
+                                   text=int(kin_energy_means[i] * 10 / GRAPH));
+
+                canvas.create_text(x, 950 - int_energy_means[i] / GRAPH, anchor=W, font="Purisa",
+                                   text=int(int_energy_means[i] * 10 / GRAPH))
+
+                canvas.create_text(x, 950 - (int_energy_means[i] + kin_energy_means[i]) / GRAPH, anchor=W,
+                                   font="Purisa", text=int((int_energy_means[i] + kin_energy_means[i]) * 10 / GRAPH))
+
+
+            x += Step
+
+
+
+
+
+
+def Draw_obj(obj, shift):
+    obj.Draw();
+    obj.PhysicalMove(400, shift);
+
+
+def Q_Sort(data, first, last, DATA_SIZE):
+    Pivot_Element = 0;
+
+    if first < last:
+        Pivot_Element = Pivot(data, first, last, DATA_SIZE);
+        Q_Sort(data, first, Pivot_Element - 1, DATA_SIZE);
+        Q_Sort(data, Pivot_Element + 1, last, DATA_SIZE);
+
+
+def Pivot(data, first, last, DATA_SIZE):
+    p = first;
+    Pivot_Value = data[first].x_;
+
+    i = first + 1
+    while i <= last:
+
+        if data[i].x_ <= Pivot_Value:
+            temp = data[i];
+            data[i] = data[p];
+            data[p] = temp;
+
+        i += 1
+
+    temp = data[p];
+    data[p] = data[first];
+    data[first] = temp;
+
+    return p;
+
+
+gas = Manager(QTY)
+k = 1
+i = 0
+while i < gas.qty_:
+    colors = choice(['red', 'green', 'blue', 'cyan', 'yellow', 'magenta'])
+    gas.obj[i] = Circle(100 + randint(0, 600) + 1, 100 + randint(0, 600) + 1, 1, k * IVX + randint(0, 10),
+                        k * IVY + randint(0, 10), IRADIUS, 1, 0, ELEVEL1, colors)
+
+    k = k * (-1)
+    i += 1
+
+i = 1
+while i < 11:
+    gas.obj[i] = Circle(IRADIUS * 2 + (i - 1) * 4 * IRADIUS, 500, 1, 0, 0, IRADIUS, IMASS, 0, ELEVEL1 * 100000000, 'black')
+    k = k * (-1)
+    i += 1
+
+gas.obj[0] = Circle(100 + randint(0, 600) + 1, 100 + randint(0, 600) + 1, 1, k * IVX + randint(0, 10),
+                    k * IVY + randint(0, 10), IRADIUS * 10, IMASS * 100, 0, ELEVEL1 * 100000000, 'grey');
+root.update()
+gas.Run();
