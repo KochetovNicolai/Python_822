@@ -322,6 +322,8 @@ while numof_generated_ccntinents < number_of_continents:
 
 #--------------------------------------------------------Генерация континента завершена--------------------------------------------------------------
 
+print("Generating_started")
+
 for i in range(1, number_of_chunks_x + 1):
     for j in range(1, number_of_chunks_y + 1):
         center_x = i * size_of_chunks_x
