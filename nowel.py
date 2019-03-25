@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-import getch as g
 import sys
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout,
                              QLabel, QApplication, QMainWindow)
@@ -17,13 +14,8 @@ class Example(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        # hbox = QHBoxLayout(self)
         pixmap = QPixmap('{}.jpg'.format(str(self.index)))
-        # self.resize(pixmap.width(), pixmap.height())
         self.lbl.setPixmap(pixmap.scaled(1024, 768))
-
-        # hbox.addWidget(self.lbl)
-        # self.setLayout(hbox)
         self.setWindowTitle('First picture')
         self.show()
 
@@ -31,10 +23,61 @@ class Example(QMainWindow):
         pixmap = QPixmap('{}.jpg'.format(str(self.index)))
         self.lbl.setPixmap(pixmap.scaled(1024, 768))
 
+    def typeEvent(self, par=0):
+        if self.index == -1:
+            self.index = 15
+            return
+
+        if self.index == -2:
+            self.index = 14
+            return
+
+        if self.index == 8:
+            if par == 1:
+                self.index += 1
+            if par == 2:
+                self.index = -1
+            if par == 3:
+                self.index = -2
+            return
+
+        if self.index == 30:
+            if par == 1:
+                self.index += 1
+            if par == 2:
+                self.index = -18
+            return
+
+        if self.index == 35:
+            if par == 1:
+                self.index += 1
+            if par == 2:
+                self.index = -26
+            return
+
+        if self.index == -21:
+            self.index = -15
+            return
+
+        if self.index == -8:
+            self.index = 48
+            return
+
+        self.index += 1
+
     def keyPressEvent(self, event):
-        if event.text() == 'w':
-            # print('kek')
-            self.index += 1
+        if event.text() == ' ':
+            self.typeEvent()
+            self.UpdatePixmap()
+            return
+
+        if event.text() == '1':
+            self.typeEvent(1)
+        if event.text() == '2':
+            self.typeEvent(2)
+        if event.text() == '3':
+            self.typeEvent(3)
+
         self.UpdatePixmap()
 
 
