@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QWidget, QHBoxLayout,
 from PyQt5.QtGui import QPixmap, QKeyEvent
 
 
-class Example(QMainWindow):
+class Novel(QMainWindow):
     index = 1
 
     def __init__(self):
@@ -83,5 +83,5 @@ class Example(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = Example()
+    ex = Novel()
     sys.exit(app.exec_())
