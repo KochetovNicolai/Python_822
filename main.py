@@ -12,52 +12,145 @@ class ExampleApp(tk.Tk):
 
     # Отступ налево
     def _draw_image_left(self, event):
-        if self.counter_x > 0: self.counter_x -= 1
-        self._draw_image()
+        if self.regime == 1:
+            if self.counter_x > 0:
+                self.counter_x -= 1
+            self._draw_image()
 
     # Отступ вправо
     def _draw_image_right(self, event):
-        self.counter_x += 1
-        self._draw_image()
+        if self.regime == 1:
+            self.counter_x += 1
+            self._draw_image()
 
     # Отступ наверх
     def _draw_image_up(self, event):
-        if self.counter_y > 0: self.counter_y -= 1
-        self._draw_image()
+        if self.regime == 1:
+            if self.counter_y > 0:
+                self.counter_y -= 1
+            self._draw_image()
 
     # Отступ вниз
     def _draw_image_down(self, event):
-        self.counter_y += 1
-        self._draw_image()
+        if self.regime == 1:
+            self.counter_y += 1
+            self._draw_image()
+
+    def _map_generate(self, event):
+
+        self.regime = 0
+        self.canvas.delete("all")
+
+        try:
+            if int(self.sizemap_x.get()) >= 7 and int(self.sizemap_y.get()) >= 7 and int(self.number_of_continents.get()) >= 0:
+                self.canvas.create_text(30, 30, anchor="nw", text="Generating is on, please, wait", font="Times 20 italic bold", fill="darkblue")
+                self.canvas.update()
+
+                self.array = map_generator(int(self.sizemap_x.get()), int(self.sizemap_y.get()), int(self.number_of_continents.get()), str(self.filename.get()), self.heights, self.t, self.size_continent)
+
+                self.regime = 1
+
+                # Первичная отрисовка
+                self._draw_image()
+                image_out = Image.new(self.im.mode, (len(self.array) * 41, len(self.array[0]) * 41))
+                for x in range(len(self.array)):
+                    for y in range(len(self.array[0])):
+                        image_out.paste(self.images[self.array[x][y]], (x * 41, y * 41))
+                image_out.save(str(self.filename.get()) + ".png")
+            else:
+                self.canvas.create_text(30, 30, anchor="nw", text="The map is too small, please, try other size", font="Times 20 italic bold", fill="red")
+                self.canvas.update()
+        except:
+            self.canvas.create_text(30, 30, anchor="nw", text="Invalid input", font="Times 20 italic bold", fill="red")
+            self.canvas.update()
 
     # Инициализация окна вывода
-    def __init__(self, master, array):
+    def __init__(self, master):
+
+        #master = looped root, к которому мы "привязались"
+
         # Указание наименований текстур, импортируемых в вывод *позиция имеет значение!!!*
-        self.names = ['Water_deep.png', 'Plains.png', 'Forests.png', 'Mountains.png', 'Snowy_mountains.png', 'Water_not_deep.png']
+        self.names = ['Water_deep.png', 'Water_not_deep.png', 'Plains.png', 'Forests.png', 'Mountains.png', 'Snowy_mountains.png']
+        self.master = master
 
         self.counter_x = self.counter_y = 0
+        # Разброс скорости генераци
+        self.t = 11
+        # Размер Континента
+        self.size_continent = 20
 
-        self.array = array
+        self.regime = 0
+
+        #Высоты биомов
+        self.heights = [15, 59, 71, 96]
+        self.array = []
         self.tk_im = []
         self.items = []
-
-        # Указание размеров canvas
-        self.canvas = tk.Canvas(master, width=512, height=512, cursor="cross")
-        self.canvas.pack(side="top", fill="both", expand=True)
+        self.images = []
 
         # Привязка нажатий на кнопки к соответствующим событиям
-        master.bind("<Up>", self._draw_image_up)
-        master.bind("<Down>", self._draw_image_down)
-        master.bind("<Left>", self._draw_image_left)
-        master.bind("<Right>", self._draw_image_right)
+
+        self.master.bind("<Up>", self._draw_image_up)
+        self.master.bind("<Down>", self._draw_image_down)
+        self.master.bind("<Left>", self._draw_image_left)
+        self.master.bind("<Right>", self._draw_image_right)
+
+        self.frame = tk.Frame(self.master)
+        self.frame.rowconfigure(1, weight=1)
+        self.framework1 = tk.Frame(self.frame)
+
+        self.sizemap_x_label = tk.Label(self.framework1, text="Введите длину карту: ")
+        self.sizemap_y_label = tk.Label(self.framework1, text="Введите ширину карты: ")
+        self.number_of_continents_label = tk.Label(self.framework1, text="Введите количество конинентов: ")
+        self.filename_label = tk.Label(self.framework1, text="Введите имя файла, для записи карты: ")
+
+        self.sizemap_x_label.grid(row=0, column=0, sticky="w")
+        self.sizemap_y_label.grid(row=1, column=0, sticky="w")
+        self.number_of_continents_label.grid(row=2, column=0, sticky="w")
+        self.filename_label.grid(row=3, column=0, sticky="w")
+
+        self.sizemap_x = tk.StringVar()
+        self.sizemap_y = tk.StringVar()
+        self.number_of_continents = tk.StringVar()
+        self.filename = tk.StringVar()
+
+        self.sizemap_x_entry = tk.Entry(self.framework1, textvariable=self.sizemap_x)
+        self.sizemap_y_entry = tk.Entry(self.framework1, textvariable=self.sizemap_y)
+        self.number_of_continents_entry = tk.Entry(self.framework1, textvariable=self.number_of_continents)
+        self.filename_entry = tk.Entry(self.framework1, textvariable=self.filename)
+
+        self.sizemap_x_entry.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+        self.sizemap_y_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+        self.number_of_continents_entry.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+        self.filename_entry.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        self.framework1.grid(row=0, column=0, sticky="n")
+
+        self.framework2 = tk.Frame(self.frame)
+        self.framework2.rowconfigure(0, weight=1)
+        self.framework2.columnconfigure(0, weight=1)
+
+        self.message_button = tk.Button(self.framework2, text="Сгенерировать Карту", bg="green")
+        self.message_button.grid(row=0, column=0, sticky="nesw")
+        self.message_button.bind("<Button-1>", self._map_generate)
+        self.framework2.grid(row=1, column=0, sticky="nesw")
+
+        self.frame.grid(row=0, column=0, sticky="nesw")
+
+        self.frame1 = tk.Frame(self.master)
+        self.frame1.columnconfigure(0, weight=1)
+        self.frame1.rowconfigure(0, weight=1)
+
+        # Указание размеров canvas
+        self.canvas = tk.Canvas(self.frame1, cursor="cross")
+        self.canvas.grid(row=0, column=0, sticky="nesw")
+
+        self.frame1.grid(row=0, column=1, sticky="nesw")
 
         # Создание массива текстур, для ускорения работы вывода изображений
         for name in self.names:
             self.im = Image.open(name)
             self.tk_im.append(ImageTk.PhotoImage(self.im))
-
-        # Первичная отрисовка
-        self._draw_image()
+            self.images.append(self.im)
 
     # Вывод картинок на канвас
     def _draw_image(self):
@@ -66,12 +159,38 @@ class ExampleApp(tk.Tk):
         self.items.clear()
         self.canvas.delete("all")
 
+        # Было подсчитано, что при расширении 1920х1080 на экран помещается прямогугольник размера 47х27 клеток
+        SIZE_OF_SCREEN_X = 47
+        SIZE_OF_SCREEN_Y = 27
+        SIZE_OF_IMAGE = 41
+
         # Отрисовка подвинутого изображения
-        for x_map in range(self.counter_x, min(len(self.array), self.counter_x + 47)):
-            for y_map in range(self.counter_y, min(len(self.array[0]), self.counter_y + 27)):
-                self.items.append(self.canvas.create_image(41 * (x_map - self.counter_x), 41 * (y_map- self.counter_y), anchor="nw", image=self.tk_im[self.array[x_map][y_map]]))
+        for x_map in range(self.counter_x, min(len(self.array), self.counter_x + SIZE_OF_SCREEN_X)):
+            for y_map in range(self.counter_y, min(len(self.array[0]), self.counter_y + SIZE_OF_SCREEN_Y)):
+                self.items.append(self.canvas.create_image(SIZE_OF_IMAGE * (x_map - self.counter_x), SIZE_OF_IMAGE * (y_map- self.counter_y), anchor="nw", image=self.tk_im[self.array[x_map][y_map]]))
 
 #-----------------------------------------------------------------------------Классы--------------------------------------------------------------------------
+
+class square:
+    def __init__(self):
+        # Скорость "роста высоты" клетки
+        self.speed = int()
+        # Высота клетки в каком-то определённом чанке
+        self.main = int()
+        # Количество "посещений" клетки
+        self.count = int()
+        # Тип поверхнсти, которая будет располагаться на клетке
+        self.id = int()
+        # Итоговая (средняя) высота клетки по всем чанкам, с учётом близости от центров генераций
+        self.heigth = int()
+        # Лопнула ли ещё эта клетка при генерации конкретного чанка?
+        self.turn = int()
+        # "Вес", на который нужно делить self.heigth, для получения средней высоты
+        self.delta = int()
+        # Является ли генерируемый чанк - чанком суши?
+        self.type = int()
+        # Тип "биома", по которому бедет генерироваться чанк
+        self.typeres = int()
 
 class square_map:
 
@@ -147,7 +266,8 @@ class square_map:
         mates = self.neighbours(x, y, delta_x, delta_y)
         # Увеличиваем кол-во их посещений на 1 у каждого
         for coords in mates:
-            if self.stock[coords[0]][coords[1]].count < 3: self.stock[coords[0]][coords[1]].count += mode
+            if self.stock[coords[0]][coords[1]].count < 3:
+                self.stock[coords[0]][coords[1]].count += mode
         return mates
 
     # Очистка клеток от "мусора"
@@ -162,19 +282,19 @@ class square_map:
     def show_continent(self, step_x = 1, step_y = 1):
         for i in range(1, ((len(self.stock) - 1) // step_x) + 1):
             for j in range(1, ((len(self.stock[0]) - 1) // step_y) + 1):
-                print(self.stock[size_of_chunks_x * i][size_of_chunks_y * j].typeres, end=' ')
+                print(self.stock[step_x * i][step_y * j].typeres, end=' ')
             print()
         print()
 
     # Отправка скорости взрывающейся клетки её соседям
     def send_speed(self, _from, _to, t, ground_level, speed_cut):
+        to = self.stock[_to[0]][_to[1]]
+        father = self.stock[_from[0]][_from[1]]
         # Считаем знак нащей функии
-        value = sign(self.stock[_to[0]][_to[1]].speed + self.stock[_from[0]][_from[1]].speed +
-                     random.randint(0, t - 1) - random.randint(0, t - 1) + (ground_level - self.stock[_from[0]][_from[1]].main))
+        value = sign(to.speed + father.speed + custom_rand(t) + (ground_level - father.main))
 
         # Изменяем скорость роста высот в клетке-соседе по формуле ниже (игнорируя знак)
-        self.stock[_to[0]][_to[1]].speed = ((value * (self.stock[_to[0]][_to[1]].speed + self.stock[_from[0]][_from[1]].speed +
-                                            random.randint(0, t - 1) - random.randint(0, t - 1) + (ground_level - self.stock[_from[0]][_from[1]].main))) % speed_cut) * value
+        to.speed = ((value * (to.speed + father.speed + custom_rand(t) + (ground_level - father.main))) % speed_cut) * value
 
     # Аппроксимация высот карты
     def approximation(self):
@@ -188,29 +308,37 @@ class square_map:
             for map_y in range(1, len(self.interpolated_map[0]) + 1):
 
                 # Создаём счётчики клеток, встречающихся в каждой "области"
-                counters = [0, 0, 0, 0, 0, 0]
+                counters = [0] * 6
                 for x in range((2 * map_x - 2) * interpolation_x, (2 * map_x) * interpolation_x):
                     for y in range((2 * map_y - 2) * interpolation_y, (2 * map_y) * interpolation_y):
                         # Считаем, сколько клеток каждого типа встретилось на каждой из областей
-                        counters[map.stock[x][y].id] += 1
+                        counters[self.stock[x][y].id] += 1
                 # Пишем id самой часто встречающейся клетки в соотвествующую клетку аппроксимированной карты высот
                 self.interpolated_map[map_x - 1][map_y - 1] = counters.index(max(counters))
 
     # "Усредняем" высоту каждой из клеток
     def heigths_approximation(self):
+
+        borders = [40, 48, 65, 77, 94]
+
         # Проходимся по всем клеткам карты
         for array in self.stock:
             for item in array:
                 # Усредняем высоту по всем принятым значениям
                 if item.delta > 0: item.heigth = item.heigth // item.delta
 
+                counter = 0
+                ckecker = True
+
                 # В зав-ти от высоты клетки, присваиваем ей свой "биом"
-                if item.heigth <= 40: item.id = 0
-                if item.heigth >= 41 and item.heigth <= 48: item.id = 5
-                if item.heigth >= 49 and item.heigth <= 65: item.id = 1
-                if item.heigth >= 66 and item.heigth <= 77: item.id = 2
-                if item.heigth >= 78 and item.heigth <= 94: item.id = 3
-                if item.heigth >= 95: item.id = 4
+                while counter < len(borders) and ckecker:
+                    if item.heigth <= borders[counter]:
+                        item.id = counter
+                        ckecker = False
+                    else:
+                        counter += 1
+                if counter == 5:
+                    item.id = counter
 
     # Убираем промежуточные значения из карты высот
     def clean_buffer(self):
@@ -239,30 +367,33 @@ class square_map:
             self.stock[x][y].typeres = 3
 
     def popping_initialisation(self, coords, radius, counter):
-        self.stock[coords[0]][coords[1]].main = (self.stock[coords[0]][coords[1]].main + self.stock[coords[0]][coords[1]].speed) // self.stock[coords[0]][coords[1]].count
-        self.stock[coords[0]][coords[1]].speed = self.stock[coords[0]][coords[1]].speed // self.stock[coords[0]][coords[1]].count
-        self.stock[coords[0]][coords[1]].delta += (radius - counter)
-        self.stock[coords[0]][coords[1]].heigth += self.stock[coords[0]][coords[1]].main * (radius - counter)
+        cur_stock = self.stock[coords[0]][coords[1]]
+        cur_stock.main = (cur_stock.main + cur_stock.speed) //cur_stock.count
+        cur_stock.speed = cur_stock.speed // cur_stock.count
+        cur_stock.delta += (radius - counter)
+        cur_stock.heigth += cur_stock.main * (radius - counter)
 
-    def biome_initialisation(self, center_x, center_y, normal, radius):
-        self.stock[center_x][center_y].main = normal[self.stock[center_x][center_y].typeres]
-        self.stock[center_x][center_y].turn = 1
+    def biome_initialisation(self, center_x, center_y, normal, radius, t):
+        center = self.stock[center_x][center_y]
+        center.main = normal[center.typeres]
+        center.turn = 1
 
         # Изменение итоговой высоты на значение, пропорциональное близости к центру генерации
-        self.stock[center_x][center_y].heigth = self.stock[center_x][center_y].main * radius
-        self.stock[center_x][center_y].delta += radius
+        center.heigth = center.main * radius
+        center.delta += radius
         mates = self.pop(center_x, center_y, 3)
         for mate in mates:
-            self.send_speed((center_x, center_y), mate, t, normal[self.stock[center_x][center_y].typeres], 20)
-            self.stock[mate[0]][mate[1]].main = self.stock[center_x][center_y].main * 3
-            self.stock[mate[0]][mate[1]].speed *= 3
-            self.stock[mate[0]][mate[1]].turn = 1
+            square_mate = self.stock[mate[0]][mate[1]]
+            self.send_speed((center_x, center_y), mate, t, normal[center.typeres], 20)
+            square_mate.main = center.main * 3
+            square_mate.speed *= 3
+            square_mate.turn = 1
             self.under_development.put(mate)
-            self.turn_cleaning.append(self.stock[mate[0]][mate[1]])
+            self.turn_cleaning.append(square_mate)
 
-        self.stock[center_x][center_y].count = 4
-        self.stock[center_x][center_y].main = 0
-        self.stock[center_x][center_y].speed = 0
+        center.count = 4
+        center.main = 0
+        center.speed = 0
 
     def add_to_development(self, mate):
         self.stock[mate[0]][mate[1]].turn = 1
@@ -270,68 +401,45 @@ class square_map:
         self.turn_cleaning.append(self.stock[mate[0]][mate[1]])
 
     def speed_parameters_choosing(self, center_x, center_y, coords, mate, t, normal):
+        center = self.stock[center_x][center_y]
+        father = self.stock[coords[0]][coords[1]]
 
-        # Если биом водный, то
-        if self.stock[center_x][center_y].typeres == 0:
+        # 0 - Вода
+        # 1 - Равнина
+        # 2 - Лес
+        # 3 - Горы
 
-            # 3 условия на высоту "лопнувшего" соседа, меняющих режим генерации клетки
-            if self.stock[coords[0]][coords[1]].main < 40:
-                self.send_speed(coords, mate, t, normal[0], 20)
-            elif self.stock[coords[0]][coords[1]].main < 48:
-                self.send_speed(coords, mate, t, 45, 20)
-            elif self.stock[coords[0]][coords[1]].main >= 48:
-                self.send_speed(coords, mate, t, normal[1], 2000)
+        borders = [[40, 48],
+                   [49, 66],
+                   [54, 86],
+                   []]
+        middle_heights = [[normal[0], 45, normal[1]],
+                          [43, normal[1], normal[2]],
+                          [45, normal[2], normal[3]],
+                          [normal[3]]]
 
-        # Если биом равнинный, то
-        if self.stock[center_x][center_y].typeres == 1:
+        speed_limit_borders = [[20, 20, 1000],
+                               [20, 20, 20],
+                               [20, 20, 20],
+                               [30]]
 
-            # 3 условия на высоту "лопнувшего" соседа, меняющих режим генерации клетки
-            if self.stock[coords[0]][coords[1]].main <= 48:
-                self.send_speed(coords, mate, t, 43, 20)
-            elif self.stock[coords[0]][coords[1]].main <= 65:
-                self.send_speed(coords, mate, t, normal[1], 20)
-            elif self.stock[coords[0]][coords[1]].main > 65:
-                self.send_speed(coords, mate, t, normal[2], 20)
+        counter = 0
+        ckecker = True
 
-        # Если биом лесной, то
-        if self.stock[center_x][center_y].typeres == 2:
-
-            # 3 условия на высоту "лопнувшего" соседа, меняющих режим генерации клетки
-            if self.stock[coords[0]][coords[1]].main <= 53:
-                self.send_speed(coords, mate, t, 45, 20)
-            elif self.stock[coords[0]][coords[1]].main <= 85:
-                self.send_speed(coords, mate, t, normal[2], 20)
-            elif self.stock[coords[0]][coords[1]].main > 85:
-                self.send_speed(coords, mate, t, normal[3], 20)
-
-        # Если биом горный, то
-        if self.stock[center_x][center_y].typeres == 3:
-            self.send_speed(coords, mate, t, normal[3], 30)
-
-
-
-class square:
-    def __init__(self):
-        # Скорость "роста высоты" клетки
-        self.speed = int()
-        # Высота клетки в каком-то определённом чанке
-        self.main = int()
-        # Количество "посещений" клетки
-        self.count = int()
-        # Тип поверхнсти, которая будет располагаться на клетке
-        self.id = int()
-        # Итоговая (средняя) высота клетки по всем чанкам, с учётом близости от центров генераций
-        self.heigth = int()
-        # Лопнула ли ещё эта клетка при генерации конкретного чанка?
-        self.turn = int()
-        # "Вес", на который нужно делить self.heigth, для получения средней высоты
-        self.delta = int()
-        # Является ли генерируемый чанк - чанком суши?
-        self.type = int()
-        # Тип "биома", по которому бедет генерироваться чанк
-        self.typeres = int()
+        # В зав-ти от высоты клетки, присваиваем ей свой "биом"
+        while counter < len(borders[center.typeres]) and ckecker:
+            if father.main < borders[center.typeres][counter]:
+                self.send_speed(coords, mate, t, middle_heights[center.typeres][counter], speed_limit_borders[center.typeres][counter])
+                ckecker = False
+            else:
+                counter += 1
+        if ckecker:
+            self.send_speed(coords, mate, t, middle_heights[center.typeres][counter], speed_limit_borders[center.typeres][counter])
 
 #--------------------------------------------------------------------------------Функции----------------------------------------------------------------------
+
+def custom_rand(t):
+    return random.randint(0, t - 1) - random.randint(0, t - 1)
 
 def sign(num):
     return -1 if num < 0 else 1
@@ -364,15 +472,17 @@ def continent_generate(map, center_x, center_y, size_of_chunks_x, size_of_chunks
 
             # Работа с соседями лопающейся клетки
             for mate in mates:
-                if map.stock[mate[0]][mate[1]].type == 1:
+                square_mate = map.stock[mate[0]][mate[1]]
+                if square_mate.type == 1:
                     counter += 1
-                if map.stock[mate[0]][mate[1]].turn == 0 and map.stock[mate[0]][mate[1]].count >= 3:
+                if square_mate.turn == 0 and square_mate.count >= 3:
                     under_development.put(mate)
-                    map.stock[mate[0]][mate[1]].turn = 1
+                    square_mate.turn = 1
 
             # Работа непосредственно с лопающейся клуткой
             if map.stock[coords[0]][coords[1]].type == 0:
-                if rand < counter * 28: map.continent_tipisation(coords[0], coords[1])
+                if rand < counter * 28:
+                    map.continent_tipisation(coords[0], coords[1])
 
         # Увеличиваем счётчик размера континента
         size_of_generated_continent += 1
@@ -398,7 +508,8 @@ def generate_map_of_continents(map, size_of_chunks_x, size_of_chunks_y, number_o
             for mate in mates:
                 rand = random.randint(1, 50) + random.randint(1, 50)
                 # Заполняем соседей данными о посещаемости и типе биома
-                if rand < 85: map.continent_tipisation(mate[0], mate[1])
+                if rand < 85:
+                    map.continent_tipisation(mate[0], mate[1])
 
             # Генерируем континент
             continent_generate(map, rand_x, rand_y, size_of_chunks_x, size_of_chunks_y, size)
@@ -419,6 +530,7 @@ def generate_chunk(map, center_x, center_y, radius, normal, t):
         for n in range(size_of_queue):
             # Узнаём, какую клетку сейчас нужно "лопнуть"
             coords = map.under_development.get()
+            father = map.stock[coords[0]][coords[1]]
 
             # Заполнение "лопающейся" клетки
             map.popping_initialisation(coords, radius, counter)
@@ -428,27 +540,31 @@ def generate_chunk(map, center_x, center_y, radius, normal, t):
 
             # Идём по соседям лопающейся клетки
             for mate in mates:
+
+                square_mate = map.stock[mate[0]][mate[1]]
+
                 # Проверяем, не "лопнул" ли сосед клетки раньше?
-                if map.stock[mate[0]][mate[1]].turn == 0:
+                if square_mate.turn == 0:
 
                     # Увеличиваем высоту соседа "лопающейся" клетки
-                    map.stock[mate[0]][mate[1]].main += map.stock[coords[0]][coords[1]].main
+                    square_mate.main += father.main
 
                     # Если клетка получила данные с как минимум трёх соседей, то на "лопается" (добавляется к обрабатываемым)
-                    if map.stock[mate[0]][mate[1]].count >= 3: map.add_to_development(mate)
+                    if square_mate.count >= 3:
+                        map.add_to_development(mate)
 
                     # В зависимости от типа местности, передаём сосседям разную скорость изменения высоты
                     map.speed_parameters_choosing(center_x, center_y, coords, mate, t, normal)
 
             # Чистим "лопнутого" соседа
-            map.stock[coords[0]][coords[1]].main = 0
-            map.stock[coords[0]][coords[1]].speed = 0
+            father.main = 0
+            father.speed = 0
         counter += 1
     # Чистим все системные значения, для следующих итераций.
     map.clean_buffer()
 
 # Генерация рельефа на всей карте
-def generate_landscape(map, number_of_chunks_x, number_of_chunks_y, normal, t):
+def generate_landscape(map, number_of_chunks_x, number_of_chunks_y, size_of_chunks_x, size_of_chunks_y, normal, t):
 
     # Идём по всем чанкам
     for i in range(1, number_of_chunks_x + 1):
@@ -460,7 +576,7 @@ def generate_landscape(map, number_of_chunks_x, number_of_chunks_y, normal, t):
             center_y = j * size_of_chunks_y
 
             # Игнициализируем центр чанка
-            map.biome_initialisation(center_x, center_y, normal, radius)
+            map.biome_initialisation(center_x, center_y, normal, radius, t)
 
             # Генерируем "чанк"
             generate_chunk(map, center_x, center_y, radius, normal, t)
@@ -482,63 +598,51 @@ def write_map_array(stock, filename):
         file.write(output + '\n')
         output = ""
 
-#--------------------------------------------------------------------------------Константы-----------------------------------------------------------------------
+# Генерация карты
+def map_generator(sizemap_x, sizemap_y, number_of_continents, filename, normal, t, size):
+    # Длина карты до аппроксимации
+    length = sizemap_x * 4
+    # Высота карты до аппроксимации
+    heigth = sizemap_y * 4
+    number_of_chunks_x = length // 25
+    number_of_chunks_y = heigth // 25
 
-# Средние высоты биомов
-normal = [15, 59, 71, 96]
-# Разброс скорости генерации
-t = 11
+    # Задаём необходимый размер карты
+    map = square_map(length, heigth, sizemap_x, sizemap_y)
 
-# Размер Континента
-size = 20
+    size_of_chunks_x = length // (number_of_chunks_x + 1)
+    size_of_chunks_y = heigth // (number_of_chunks_y + 1)
+    numof_generated_ccntinents = 0
+
+    # Генерируем карту континентов
+    generate_map_of_continents(map, size_of_chunks_x, size_of_chunks_y, number_of_chunks_x, number_of_chunks_y,
+                               number_of_continents, size)
+
+    # Уведомляем об успешном размещении материков на образе карты
+    #print("Generating_started")
+
+    # Генерируем высоты континента
+    generate_landscape(map, number_of_chunks_x, number_of_chunks_y, size_of_chunks_x, size_of_chunks_y, normal, t)
+
+    # Аппроксимация высот карты
+    map.heigths_approximation()
+
+    # Аппроксимация клеток карты
+    map.approximation()
+
+    write_map_array(map.interpolated_map, filename)
+
+    return map.interpolated_map
 
 #----------------------------------------------------------------------------Тело программы----------------------------------------------------------------------
-
-# Итоговая лина карты
-sizemap_x = int(input())
-# Итоговая ширина карты
-sizemap_y = int(input())
-# Кол-во генерируемых континентов (Если карта маленькая, а континентов оч много - error)
-number_of_continents = int(input())
-# Название файла, в который будет записываться карта высот
-filename = str(input())
-
-# Длина карты до аппроксимации
-length = sizemap_x * 4
-# Высота карты до аппроксимации
-heigth = sizemap_y * 4
-number_of_chunks_x = length // 25
-number_of_chunks_y = heigth // 25
-
-# Задаём необходимый размер карты
-map = square_map(length, heigth, sizemap_x, sizemap_y)
-
-size_of_chunks_x = length // (number_of_chunks_x + 1)
-size_of_chunks_y = heigth // (number_of_chunks_y + 1)
-numof_generated_ccntinents = 0
-
-# Генерируем карту континентов
-generate_map_of_continents(map, size_of_chunks_x, size_of_chunks_y, number_of_chunks_x, number_of_chunks_y, number_of_continents, size)
-
-# Уведомляем об успешном размещении материков на образе карты
-print("Generating_started")
-
-# Генерируем высоты континента
-generate_landscape(map, number_of_chunks_x, number_of_chunks_y, normal, t)
-
-# Аппроксимация высот карты
-map.heigths_approximation()
-
-# Аппроксимация клеток карты
-map.approximation()
-
-write_map_array(map.interpolated_map, filename)
 
 # Работаем с окном вывода программы
 root = tk.Tk()
 root.title("Генератор карт")
-app = ExampleApp(root, map.interpolated_map)
-if sys.platform != 'linux2':
+root.rowconfigure(0, weight=1)
+root.columnconfigure(1, weight=1)
+app = ExampleApp(root)
+if sys.platform != 'linux':
     root.wm_state('zoomed')
 else:
     root.wm_attributes('-zoomed', True)
