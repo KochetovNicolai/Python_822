@@ -36,6 +36,7 @@ class ExampleApp(tk.Tk):
             self.counter_y += 1
             self._draw_image()
 
+    # Генерация карты
     def _map_generate(self, event):
 
         self.regime = 0
@@ -52,11 +53,14 @@ class ExampleApp(tk.Tk):
 
                 # Первичная отрисовка
                 self._draw_image()
-                image_out = Image.new(self.im.mode, (len(self.array) * 41, len(self.array[0]) * 41))
+                self.image_out = Image.new(self.im.mode, (len(self.array) * 41, len(self.array[0]) * 41))
                 for x in range(len(self.array)):
                     for y in range(len(self.array[0])):
-                        image_out.paste(self.images[self.array[x][y]], (x * 41, y * 41))
-                image_out.save(str(self.filename.get()) + ".png")
+                        self.image_out.paste(self.images[self.array[x][y]], (x * 41, y * 41))
+                self.image_out.save(str(self.filename.get()) + ".png")
+                self.smallmap = ImageTk.PhotoImage(self.image_out.resize((400, 400), Image.ANTIALIAS))
+                self.minimap.configure(image=self.smallmap)
+                self.minimap.image = self.smallmap
             else:
                 self.canvas.create_text(30, 30, anchor="nw", text="The map is too small, please, try other size", font="Times 20 italic bold", fill="red")
                 self.canvas.update()
@@ -132,6 +136,14 @@ class ExampleApp(tk.Tk):
         self.message_button = tk.Button(self.framework2, text="Сгенерировать Карту", bg="green")
         self.message_button.grid(row=0, column=0, sticky="nesw")
         self.message_button.bind("<Button-1>", self._map_generate)
+
+        self.smallmap = Image.open("Example.png")
+        self.smallmap = self.smallmap.resize((400, 400), Image.ANTIALIAS)
+        self.smallmap = ImageTk.PhotoImage(self.smallmap)
+
+        self.minimap = tk.Label(self.framework2, image=self.smallmap)
+        self.minimap.grid(row=1, column=0, sticky="nw")
+
         self.framework2.grid(row=1, column=0, sticky="nesw")
 
         self.frame.grid(row=0, column=0, sticky="nesw")
@@ -619,7 +631,7 @@ def map_generator(sizemap_x, sizemap_y, number_of_continents, filename, normal, 
                                number_of_continents, size)
 
     # Уведомляем об успешном размещении материков на образе карты
-    #print("Generating_started")
+    print("Generating_started")
 
     # Генерируем высоты континента
     generate_landscape(map, number_of_chunks_x, number_of_chunks_y, size_of_chunks_x, size_of_chunks_y, normal, t)
