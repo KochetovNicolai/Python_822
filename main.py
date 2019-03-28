@@ -43,7 +43,7 @@ class ExampleApp(tk.Tk):
         self.canvas.delete("all")
 
         try:
-            if int(self.sizemap_x.get()) >= 7 and int(self.sizemap_y.get()) >= 7 and int(self.number_of_continents.get()) >= 0:
+            if int(self.sizemap_x.get()) >= 7 and int(self.sizemap_y.get()) >= 7 and int(self.number_of_continents.get()) >= 0 and not str(self.filename.get()) == "Example":
                 self.canvas.create_text(30, 30, anchor="nw", text="Generating is on, please, wait", font="Times 20 italic bold", fill="darkblue")
                 self.canvas.update()
 
@@ -58,7 +58,7 @@ class ExampleApp(tk.Tk):
                     for y in range(len(self.array[0])):
                         self.image_out.paste(self.images[self.array[x][y]], (x * 41, y * 41))
                 self.image_out.save(str(self.filename.get()) + ".png")
-                self.smallmap = ImageTk.PhotoImage(self.image_out.resize((400, 400), Image.ANTIALIAS))
+                self.smallmap = ImageTk.PhotoImage(self.image_out.resize((350, min(900, round(350 * (len(self.array[0]) / len(self.array))))), Image.ANTIALIAS))
                 self.minimap.configure(image=self.smallmap)
                 self.minimap.image = self.smallmap
             else:
@@ -138,7 +138,7 @@ class ExampleApp(tk.Tk):
         self.message_button.bind("<Button-1>", self._map_generate)
 
         self.smallmap = Image.open("Example.png")
-        self.smallmap = self.smallmap.resize((400, 400), Image.ANTIALIAS)
+        self.smallmap = self.smallmap.resize((350, 350), Image.ANTIALIAS)
         self.smallmap = ImageTk.PhotoImage(self.smallmap)
 
         self.minimap = tk.Label(self.framework2, image=self.smallmap)
