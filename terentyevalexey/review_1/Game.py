@@ -9,6 +9,7 @@ import pygame
 import sys
 import os
 from singleton import singleton
+from enum import Enum
 
 if __name__ == '__main__':
     logo = pygame.image.load(os.path.join('data', 'logo.png'))
@@ -47,36 +48,6 @@ class Cat:
         self.muscle = 0
         self.tired = 0
         self.sleepy = 0
-        self.animations = {
-            "idle": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'idle_{}.png'.format(i)))
-                for i in range(1, 5)],
-            "dead": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'dead_{}.png'.format(i)))
-                for i in range(1, 8)],
-            "kick": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'kick_{}.png'.format(i)))
-                for i in range(1, 9)],
-            "punch": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'punch_{}.png'.format(i)))
-                for i in range(1, 7)],
-            "walk": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'walk_{}.png'.format(i)))
-                for i in range(1, 9)],
-            "walk_left": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'walk_left_{}.png'.format(i)))
-                for i in range(1, 9)],
-            "sleep": [
-                pygame.image.load(
-                    os.path.join('data', 'cat', 'sleep_{}.png'.format(i)))
-                for i in range(1, 8)]
-        }
 
     def reset(self):
         self.name = "Kitty"
@@ -91,19 +62,52 @@ class Cat:
         self.sleepy = 0
 
 
+class Animations(Enum):
+    idle = [
+               pygame.image.load(
+                   os.path.join('data', 'cat', 'idle_{}.png'.format(i)))
+               for i in range(1, 5)]
+    dead = [
+               pygame.image.load(
+                   os.path.join('data', 'cat', 'dead_{}.png'.format(i)))
+               for i in range(1, 8)]
+    kick = [
+               pygame.image.load(
+                   os.path.join('data', 'cat', 'kick_{}.png'.format(i)))
+               for i in range(1, 9)]
+    punch = [
+                pygame.image.load(
+                    os.path.join('data', 'cat', 'punch_{}.png'.format(i)))
+                for i in range(1, 7)]
+    walk = [
+               pygame.image.load(
+                   os.path.join('data', 'cat', 'walk_{}.png'.format(i)))
+               for i in range(1, 9)]
+    walk_left = [
+                    pygame.image.load(
+                        os.path.join('data', 'cat',
+                                     'walk_left_{}.png'.format(i)))
+                    for i in range(1, 9)]
+    sleep = [
+        pygame.image.load(
+            os.path.join('data', 'cat', 'sleep_{}.png'.format(i)))
+        for i in range(1, 8)]
+
+
 def sleep():
     cat = Cat()
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
-    for _ in range(game_info.tick_rate // 7 * 7):
+    for _ in range(game_info.tick_rate - game_info.tick_rate % len(
+            Animations.sleep.value)):
         clock.tick(game_info.tick_rate)
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (
                 game_info.width * 10, game_info.height * 10)),
             (0, 0))
         draw_score()
-        draw_cat("sleep")
+        draw_cat(Animations.sleep)
     for cur_time in range(10 * game_info.tick_rate):
         clock.tick(game_info.tick_rate)
         if cur_time % game_info.tick_rate == 0:
@@ -117,10 +121,10 @@ def sleep():
             pygame.transform.scale(game_info.background, (
                 game_info.width * 10, game_info.height * 10)), (0, 0))
         draw_score()
-        game_info.screen.blit(pygame.transform.scale(cat.animations["sleep"][6],
-                                                     (game_info.width * 4,
-                                                      game_info.height * 4)),
-                              (cat.x, cat.y))
+        game_info.screen.blit(
+            pygame.transform.scale(Animations.sleep.value[6],
+                                   (game_info.width * 4, game_info.height * 4)),
+            (cat.x, cat.y))
         pygame.display.update()
         pygame.event.clear()
 
@@ -139,7 +143,7 @@ def run_cat_run():
             pygame.transform.scale(game_info.bamboo, (
                 game_info.height * 48, game_info.height * 10)), (0, 0),
             (cur_x, 0, cur_x + 2133, 1200))
-        draw_cat("walk")
+        draw_cat(Animations.walk)
         cat.x += game_info.width // 20
         cur_x += game_info.width // 20
 
@@ -167,7 +171,7 @@ def punching_bag():
             pygame.transform.scale(game_info.background, (
                 game_info.width * 10, game_info.height * 10)), (0, 0))
         draw_score()
-        draw_cat("punch")
+        draw_cat(Animations.punch)
 
     cat.muscle += 3
     cat.tired += 2
@@ -186,7 +190,7 @@ def kicking_bag():
                                     game_info.height * 10)),
             (0, 0))
         draw_score()
-        draw_cat("kick")
+        draw_cat(Animations.kick)
 
     cat.muscle += 2
     cat.tired += 2
@@ -203,7 +207,7 @@ def die():
             pygame.transform.scale(game_info.background, (
                 game_info.width * 10, game_info.height * 10)), (0, 0))
         draw_score()
-        draw_cat("dead")
+        draw_cat(Animations.dead)
 
     font = pygame.font.SysFont("calibri", game_info.height, bold=True)
     text = font.render("{} is dead".format(cat.name), True, (32, 32, 32))
@@ -238,13 +242,14 @@ def draw_cat(status):
 
     cur_frame = cat.anim_time // (
             game_info.tick_rate //
-            len(cat.animations[status]))
+            len(status.value))
     cat.anim_time += 1
-    if cur_frame >= len(cat.animations[status]):
+
+    if cur_frame >= len(status.value):
         cat.anim_time = 0
         return
     game_info.screen.blit(
-        pygame.transform.scale(cat.animations[status][cur_frame],
+        pygame.transform.scale(status.value[cur_frame],
                                (game_info.width * 4, game_info.height * 4)),
         (cat.x, cat.y))
     pygame.display.update()
@@ -285,7 +290,7 @@ def main_loop():
         (0, 0))
     clock = pygame.time.Clock()
 
-    status = "idle"
+    status = Animations.idle
     cat.idle_time = 0
     pygame.time.set_timer(pygame.USEREVENT + 1, 6000)  # cat sleepy inc
     pygame.time.set_timer(pygame.USEREVENT + 2, 8000)  # cat muscle dec
@@ -340,7 +345,7 @@ def main_loop():
                         punching_bag()
                     else:
                         kicking_bag()
-                    status = "idle"
+                    status = Animations.idle
                     cat.x = game_info.width * 4
                     cat.anim_time = 0
                     cat.idle_time = 0
@@ -355,30 +360,30 @@ def main_loop():
                             punching_bag()
                         else:
                             kicking_bag()
-                        status = "idle"
+                        status = Animations.idle
                         cat.x = game_info.width * 4
                         cat.anim_time = 0
                         cat.idle_time = 0
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
-            if status != "walk":
+            if status != Animations.walk:
                 cat.anim_time = 0
-                status = "walk"
+                status = Animations.walk
             cat.x += game_info.width // 10
 
         elif keys[pygame.K_LEFT]:
-            if status != "walk_left":
+            if status != Animations.walk_left:
                 cat.anim_time = 0
-                status = "walk_left"
+                status = Animations.walk_left
             cat.x -= game_info.width // 10
 
-        elif status != "idle":
-            status = "idle"
+        elif status != Animations.idle:
+            status = Animations.idle
             cat.anim_time = 0
             cat.idle_time = 0
 
-        if status == "idle":
+        if status == Animations.idle:
             cat.idle_time += 1
             if cat.idle_time == game_info.tick_rate * 5 and cat.tired > 0:
                 cat.tired -= 1
@@ -390,14 +395,14 @@ def main_loop():
                 punching_bag()
             else:
                 kicking_bag()
-            status = "idle"
+            status = Animations.idle
             cat.x = game_info.width * 4
             cat.anim_time = 0
             cat.idle_time = 0
 
         if cat.x <= - 2 * game_info.width:
             run_cat_run()
-            status = "idle"
+            status = Animations.idle
             cat.x = game_info.width * 4
             cat.anim_time = 0
             cat.idle_time = 0
