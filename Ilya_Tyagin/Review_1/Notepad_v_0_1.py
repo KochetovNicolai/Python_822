@@ -204,6 +204,9 @@ def re_tab(s):
 def main():
     try:
         name = sys.argv[1]
+        if len(sys.argv) > 2:
+            print('ERROR. Please use one argument to launch editor.')
+            return
         assert open(name, "a")
     except:
         sys.stderr.write(__doc__)
