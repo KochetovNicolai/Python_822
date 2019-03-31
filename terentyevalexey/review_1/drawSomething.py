@@ -1,7 +1,7 @@
 from Game import *
 
 
-def draw_cat(status):
+def draw_cat():
     cat = Cat()
     game_info = GameInfo()
     if cat.anim_time >= game_info.tick_rate:
@@ -9,14 +9,14 @@ def draw_cat(status):
 
     cur_frame = cat.anim_time // (
             game_info.tick_rate //
-            len(status.value))
+            len(cat.status.value))
     cat.anim_time += 1
 
-    if cur_frame >= len(status.value):
+    if cur_frame >= len(cat.status.value):
         cat.anim_time = 0
         return
     game_info.screen.blit(
-        pygame.transform.scale(status.value[cur_frame],
+        pygame.transform.scale(cat.status.value[cur_frame],
                                (game_info.width * 4, game_info.height * 4)),
         (cat.x, cat.y))
     pygame.display.update()

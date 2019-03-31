@@ -4,6 +4,7 @@ from drawSomething import draw_score, draw_cat
 
 def sleep():
     cat = Cat()
+    cat.status = Animations.sleep
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
@@ -15,7 +16,7 @@ def sleep():
                 game_info.width * 10, game_info.height * 10)),
             (0, 0))
         draw_score()
-        draw_cat(Animations.sleep)
+        draw_cat()
     for cur_time in range(10 * game_info.tick_rate):
         clock.tick(game_info.tick_rate)
         if cur_time % game_info.tick_rate == 0:
@@ -39,6 +40,7 @@ def sleep():
 
 def run_cat_run():
     cat = Cat()
+    cat.status = Animations.walk
     game_info = GameInfo()
     cat.anim_time = 0
     cat.x = 0
@@ -54,7 +56,7 @@ def run_cat_run():
             game_info.height * 10)), (0, 0), (cur_x, 0, cur_x + bamboo_size[1] *
                                               game_info.width //
                                               game_info.height, bamboo_size[1]))
-        draw_cat(Animations.walk)
+        draw_cat()
         cat.x += game_info.width * 10 // run_time
         cur_x += game_info.width * 10 // run_time
 
@@ -66,13 +68,30 @@ def run_cat_run():
     cat.x = 4 * game_info.width
     cat.y = 5 * game_info.height
     cat.anim_time = 0
+    cat.idle_time = 0
+    cat.status = Animations.idle
 
     cat.cardio += 2
     cat.tired += 1
 
 
+def hit_bag():
+    cat = Cat()
+    game_info = GameInfo()
+    cat.x = game_info.width * 6.8
+    if random.randint(1, 2) == 1:
+        punching_bag()
+    else:
+        kicking_bag()
+    cat.status = Animations.idle
+    cat.x = game_info.width * 4
+    cat.anim_time = 0
+    cat.idle_time = 0
+
+
 def punching_bag():
     cat = Cat()
+    cat.status = Animations.punch
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
@@ -82,7 +101,7 @@ def punching_bag():
             pygame.transform.scale(game_info.background, (
                 game_info.width * 10, game_info.height * 10)), (0, 0))
         draw_score()
-        draw_cat(Animations.punch)
+        draw_cat()
 
     cat.muscle += 3
     cat.tired += 2
@@ -90,6 +109,7 @@ def punching_bag():
 
 def kicking_bag():
     cat = Cat()
+    cat.status = Animations.kick
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
@@ -101,7 +121,7 @@ def kicking_bag():
                                     game_info.height * 10)),
             (0, 0))
         draw_score()
-        draw_cat(Animations.kick)
+        draw_cat()
 
     cat.muscle += 2
     cat.tired += 2
@@ -109,6 +129,7 @@ def kicking_bag():
 
 def die():
     cat = Cat()
+    cat.status = Animations.dead
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
@@ -118,7 +139,7 @@ def die():
             pygame.transform.scale(game_info.background, (
                 game_info.width * 10, game_info.height * 10)), (0, 0))
         draw_score()
-        draw_cat(Animations.dead)
+        draw_cat()
 
     font = pygame.font.SysFont("calibri", game_info.height, bold=True)
     text = font.render("{} is dead".format(cat.name), True, (32, 32, 32))
