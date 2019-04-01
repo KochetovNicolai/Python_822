@@ -39,9 +39,9 @@ def LoadBiomeTable(biome_table_name=None):
     if biome_table_name is None:
         return StdBiomeTable()
 
-    biome_table = pd.read_csv(biome_table_name, header=None)
-    return [[[*map(int, j.split())] for j in i] for i in biome_table[:-1]],\
-        [*map(int, biome_table[-1][0].split())]
+    biome_table = np.array(pd.read_csv(biome_table_name, header=None))
+    return np.array([[[*map(int, j.split())] for j in i] for i in biome_table[:-1]]), \
+        np.array([*map(int, biome_table[-1][0].split())])
 
 
 def TwoPower(N):
