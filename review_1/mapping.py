@@ -62,21 +62,21 @@ with open(MAP_FILE, 'r') as MAP:  # reading cell heights from MAP_FILE
 # 6 conversion functions
 
 def grid_to_raw(i, j):
-    if i < UI.CELL_COUNT_X and j < UI.CELL_COUNT_Y:
+    if 0 <= i < UI.CELL_COUNT_X and 0 <= j < UI.CELL_COUNT_Y:
         return (i + 0.5) * UI.CELL_SIZE, (j + 0.5) * UI.CELL_SIZE
     else:
         return None
 
 
 def raw_to_grid(x, y):
-    if x <= UI.SCREEN_WIDTH and y <= UI.SCREEN_HEIGHT:
+    if 0 <= x <= UI.SCREEN_WIDTH and 0 <= y <= UI.SCREEN_HEIGHT:
         return x // UI.CELL_SIZE, y // UI.CELL_SIZE
     else:
         return None
 
 
 def grid_to_cell(i, j):
-    if i < UI.CELL_COUNT_X and j < UI.CELL_COUNT_Y:
+    if 0 <= i < UI.CELL_COUNT_X and 0 <= j < UI.CELL_COUNT_Y:
         return mapping[i, j]
     else:
         return None
