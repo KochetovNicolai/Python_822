@@ -10,7 +10,7 @@ from mapping import cab_distance, get_cell
 
 # main unit properties
 class Stats:
-    def __init__(self, hp, speed, damage, items, vision, actions=3):
+    def __init__(self, hp, speed, damage, items, vision, actions):
         self.hp = hp
         self.speed = speed
         self.damage = damage
@@ -18,7 +18,7 @@ class Stats:
         self.vision = vision
         self.actions = actions
 
-    def set(self, hp=None, speed=None, damage=None, items=None, vision=None, actions=None):
+    def set(self, *, hp=None, speed=None, damage=None, items=None, vision=None, actions=None):
         if hp is not None:
             self.hp = hp
         if speed is not None:
@@ -83,7 +83,7 @@ class Unit(BaseUnit):
 class Fighter(Unit):
     item_id = 1
     items = [item_id]
-    stats = {"hp": 200, "speed": 6, "damage": 70, "items": items, "vision": 7}
+    stats = {"hp": 200, "speed": 6, "damage": 70, "items": items, "vision": 7, "actions": 3}
 
     def __init__(self, cell, name):
         super().__init__(cell, name, UNIT_PIC, Stats(**Fighter.stats))
@@ -98,7 +98,7 @@ class Fighter(Unit):
 class Mage(Unit):
     item_id = 2
     items = [item_id]
-    stats = {"hp": 50, "speed": 10, "damage": 40, "items": items, "vision": 8}
+    stats = {"hp": 50, "speed": 10, "damage": 40, "items": items, "vision": 8, "actions": 4}
 
     def __init__(self, cell, name):
         super().__init__(cell, name, UNIT_PIC, Stats(**Mage.stats))
@@ -113,7 +113,7 @@ class Mage(Unit):
 class Craftsman(Unit):
     item_id = 3
     items = [item_id]
-    stats = {"hp": 150, "speed": 12, "damage": 10, "items": items, "vision": 10}
+    stats = {"hp": 150, "speed": 12, "damage": 10, "items": items, "vision": 10, "actions": 5}
 
     def __init__(self, cell, name):
         super().__init__(cell, name, UNIT_PIC, Stats(**Craftsman.stats))
@@ -128,7 +128,7 @@ class Craftsman(Unit):
 class Ranger(Unit):
     item_id = 4
     items = [item_id]
-    stats = {"hp": 100, "speed": 8, "damage": 30, "items": items, "vision": 9}
+    stats = {"hp": 100, "speed": 8, "damage": 30, "items": items, "vision": 9, "actions": 4}
 
     def __init__(self, cell, name):
         super().__init__(cell, name, UNIT_PIC, Stats(**Ranger.stats))
