@@ -152,7 +152,7 @@ def move(obj, key):
         if new_cell is None:
             pass
         elif not is_water(new_cell):
-            obj.activity.make_step(new_cell.height)  # attached in def create_unit() here line 106
+            obj.activity.make_step(new_cell.height)  # attached in def create_unit()
             cell.state = None
             new_cell.state = obj
             set_cell(obj, new_cell)
