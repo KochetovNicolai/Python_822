@@ -1,56 +1,60 @@
-from arcade import key
-from arcade import draw_text
-from arcade import draw_commands
-from arcade import color
+# UI contains certain consts and in the future maybe will be the bridge between game logic and main.py
 
-SCREEN_DELTA = 100
-TEXT_MESSAGE_DELTA = 100
-TEXT_SIZE = 60
-SCREEN_WIDTH = 800 + SCREEN_DELTA * 2 + TEXT_MESSAGE_DELTA
-SCREEN_HEIGHT = 400 + SCREEN_DELTA * 2
+from arcade import key, color, draw_text
+from tech_bits import type_validation
 
-
-def draw_map():
-    map_texture = draw_commands.load_texture("map.jpg")
-    draw_commands.draw_texture_rectangle(center_x=SCREEN_WIDTH / 2, center_y=SCREEN_HEIGHT / 2, width=SCREEN_WIDTH,
-                                         height=SCREEN_HEIGHT, texture=map_texture)
+CELL_SIZE = 41  # map generator uses this by default
+CELL_COUNT_X = 25  # grid's x-axis length
+CELL_COUNT_Y = 15  # grid's y-axis length
+CELL_HIGHLIGHT_COLOR = (0, 255, 255)
+SCREEN_WIDTH = CELL_COUNT_X * CELL_SIZE
+SCREEN_HEIGHT = CELL_COUNT_Y * CELL_SIZE
 
 
 def screen_width():
-    return SCREEN_WIDTH - SCREEN_DELTA * 2 - TEXT_MESSAGE_DELTA
+    return SCREEN_WIDTH
 
 
 def screen_height():
-    return SCREEN_HEIGHT - SCREEN_DELTA * 2
+    return SCREEN_HEIGHT
 
 
-SPRITE_SCALING_UNIT = 0.1
-SPRITE_SCALING_ACTION = 0.05
-ACTION_DELTA = 100
-RADIUS_OF_MOVEMENT = 100  # не должен превышать SCREEN_DELTA, иначе спрайты вылезают за поле
-UNIT_SPEED = 5
-ACTION_COUNT_PER_TURN = 3
+BOLT_SPEED = 10  # default speed of bolt from action
+BOLT_SPEED_LIMIT = 0.1  # default speed limit of bolt from action after slowing down to which the bolt is destroyed
+SPRITE_SCALING_UNIT = 0.08  # default for unit
+ACTION_DELTA = CELL_SIZE + 10  # a temporary solution for the problem 2 described in main.py
+UNIT_SPEED = CELL_SIZE  # units step across one cell at a time
 
-MOVE_KEYS = {key.UP, key.DOWN, key.LEFT, key.RIGHT}
-
+# various keyboard consts
+MOVE_KEY_UP = key.UP
+MOVE_KEY_DOWN = key.DOWN
+MOVE_KEY_LEFT = key.LEFT
+MOVE_KEY_RIGHT = key.RIGHT
+MOVE_KEYS = {MOVE_KEY_UP, MOVE_KEY_DOWN, MOVE_KEY_LEFT, MOVE_KEY_RIGHT}
 NEXT_TURN_KEY = key.SPACE
 
 
-def display_turn(unit):
-    draw_text(f"{unit.name}'s\nturn", screen_width() + SCREEN_DELTA - TEXT_MESSAGE_DELTA, 0, color.WHITE, TEXT_SIZE,
-              bold=True, italic=True)
-
-
-# def display_unit_stats(message, number_of_units, unit):
-#    delta = SCREEN_HEIGHT / (number_of_units + 1)
-#    draw_text(message, screen_width() + SCREEN_DELTA - TEXT_MESSAGE_DELTA, delta * unit, color.WHITE, TEXT_SIZE,
-#              bold=True, italic=True)
-
-
-YOU_WIN_SIZE = 100
-
-
+# displays "player wins" message
 def you_win(winner):
     x = 0
     y = 0
-    draw_text(f"{winner.upper()} WINS!!!", x, y, color.WHITE, YOU_WIN_SIZE)
+    draw_text(f"{winner.upper()} WINS!!!", x, y, color.WHITE, font_size=100)
+
+
+# below are the functions, responsible for validating user input
+def input_number_of_players():
+    return type_validation(lambda: int(input()), message="Wrong input - expected a single number")
+
+
+def input_player_position():
+    return type_validation(lambda: tuple(map(int, input().split())),
+                           message="Wrong number of coordinates - requires 2",
+                           check=lambda x: len(x) == 2)
+
+
+CLASS_NAMES = ("mage", "fighter", "ranger", "craftsman")
+
+
+def input_player_type():
+    return type_validation(lambda: input(), message="Wrong class name",
+                           check=lambda x: x in CLASS_NAMES)
