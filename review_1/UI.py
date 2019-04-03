@@ -48,8 +48,8 @@ def input_number_of_players():
 
 def input_player_position():
     return type_validation(lambda: tuple(map(int, input().split())),
-                           message="Wrong number of coordinates - requires 2",
-                           check=lambda x: len(x) == 2)
+                           message="Wrong coordinates",
+                           check=lambda x: len(x) == 2 and 0 <= x[0] < CELL_COUNT_X and 0 <= x[1] < CELL_COUNT_Y)
 
 
 CLASS_NAMES = ("mage", "fighter", "ranger", "craftsman")
