@@ -58,6 +58,7 @@ class Menu:
                 button.Button.widht * 3 + button.Button.margin * 2
         ):
             return 'quit'
+        
         elif (
                 button.Button.widht * 3 + button.Button.margin * 2 <
                 pos[0] <
