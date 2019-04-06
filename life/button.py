@@ -1,18 +1,13 @@
-import field
 import pygame
+import colours
 
 
 class Button:
-    BACKGROUND = (133, 133, 133)
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 139, 139)
 
     widht = 140
     margin = 5
 
-    def __init__(self, txt, font, font_size, x, y, color=field.Field.WHITE, background=BLUE):
+    def __init__(self, txt, font, font_size, x, y, color=colours.WHITE, background=colours.BLUE):
         self.text = txt
         self.font = pygame.font.SysFont(font, font_size)
         self.x = x
