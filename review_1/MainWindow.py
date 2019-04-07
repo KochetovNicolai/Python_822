@@ -92,7 +92,7 @@ class MazeWidget(QWidget):
 						margin_x + (j+1)*tile_size, margin_y + (i+1)*tile_size)
 
 
-# Panel in the top of windol
+# Panel in the top of window
 class TopPanel(QFrame):
 	def __init__(self, maze_widget=None):
 		super().__init__()
@@ -112,8 +112,15 @@ class TopPanel(QFrame):
 		self.setLayout(layout)
 
 	def generate_new_maze(self):
-		height = int(self._height_field.text())
-		width = int(self._width_field.text())
+		try:
+			height = int(self._height_field.text())
+			width = int(self._width_field.text())
+		except ValueError:
+			return
+
+		if height <=0 or width <=0:
+			return
+
 		self._maze_widget.update_labyrinth(self._manager.generate_new_maze(height, width))
 
 	# Method for adding subwidgets in layout
@@ -188,7 +195,7 @@ class MainWidget(QWidget):
 		self._top_panel = TopPanel(self._maze_widget)
 
 		self._scroll_area = QScrollArea()
-		self._maze_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
+		self._maze_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self._scroll_area.setWidgetResizable(True)
 		self._scroll_area.setWidget(self._maze_widget)
 
