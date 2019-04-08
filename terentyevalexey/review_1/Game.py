@@ -50,7 +50,8 @@ def main_loop():
             return die()
 
         # event checker
-        events_handler()
+        if events_handler() == GameStatus.menu:
+            return GameStatus.menu
 
         # keys pressed checker
         keypress_handler()

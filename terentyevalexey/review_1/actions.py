@@ -10,8 +10,9 @@ def sleep():
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
+    # this range used to make frames lasted the same time
     for _ in range(game_info.tick_rate - game_info.tick_rate % len(
-            Animations.sleep.value)):
+            cat.status.value)):
         clock.tick(game_info.tick_rate)
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (
@@ -135,7 +136,9 @@ def die():
     game_info = GameInfo()
     cat.anim_time = 0
     clock = pygame.time.Clock()
-    for _ in range(game_info.tick_rate // 7 * 7):
+    # this range used to make frames lasted the same time
+    for _ in range(game_info.tick_rate - game_info.tick_rate % len(
+            cat.status.value)):
         clock.tick(game_info.tick_rate)
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (

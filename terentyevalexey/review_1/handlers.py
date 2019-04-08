@@ -43,7 +43,8 @@ def events_handler():
 
         # keydown checker for events
         if event.type == pygame.KEYDOWN:
-            keydown_handler(event)
+            if keydown_handler(event) == GameStatus.menu:
+                return GameStatus.menu
 
         # mouse click checker for events
         if event.type == pygame.MOUSEBUTTONDOWN:

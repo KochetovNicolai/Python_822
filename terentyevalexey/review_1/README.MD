@@ -7,6 +7,9 @@ pygame is required
 
 # Known issues:
 ```
-Can't return to menu from game
 Needed Enum for menu
+Needed classes Draw and Actions
+Needed defining constants
+Needed button class
+Convert menus into classes
 ```
