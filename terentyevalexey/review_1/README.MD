@@ -8,4 +8,5 @@ pygame is required
 # Known issues:
 ```
 Can't return to menu from game
+Needed Enum for menu
 ```

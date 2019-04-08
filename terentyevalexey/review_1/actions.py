@@ -1,4 +1,6 @@
-from Game import *
+import sys
+import random
+from gameInfo import *
 from drawSomething import draw_score, draw_cat
 
 
@@ -163,4 +165,4 @@ def die():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                return 0
+                return GameStatus.menu

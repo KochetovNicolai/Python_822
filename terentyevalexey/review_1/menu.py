@@ -1,5 +1,6 @@
-from Game import *
+import sys
 from drawSomething import draw_menu, draw_options
+from gameInfo import *
 
 
 def options():
@@ -28,7 +29,7 @@ def options():
                     elif (game_info.width * 6 > mx > game_info.width * 4) and (
                             game_info.height * 6.5 > my >
                             game_info.height * 5.5):
-                        return 0
+                        return GameStatus.menu
 
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -59,9 +60,9 @@ def options():
                         draw_options()
                         pygame.display.update()
                     elif cur_pose == 1:
-                        return 0
+                        return GameStatus.menu
                 if event.key == pygame.K_ESCAPE:
-                    return 0
+                    return GameStatus.menu
                 if pygame.key.get_mods() & pygame.KMOD_ALT and \
                         event.key == pygame.K_F4:
                     pygame.quit()
@@ -79,10 +80,10 @@ def main_menu():
                     mx, my = pygame.mouse.get_pos()
                     if (game_info.width * 6 > mx > game_info.width * 4) and (
                             game_info.height * 4 > my > game_info.height * 3):
-                        return 2
+                        return GameStatus.loop
                     elif (game_info.width * 6 > mx > game_info.width * 4) and (
                             game_info.height * 6 > my > game_info.height * 5):
-                        return 1
+                        return GameStatus.options
                     elif (game_info.width * 6 > mx > game_info.width * 4) and (
                             game_info.height * 8 > my > game_info.height * 7):
                         pygame.quit()
@@ -101,9 +102,9 @@ def main_menu():
                         event.key == pygame.K_KP_ENTER or \
                         event.key == pygame.K_SPACE:
                     if cur_pose == 0:
-                        return 2
+                        return GameStatus.loop
                     elif cur_pose == 1:
-                        return 1
+                        return GameStatus.options
                     elif cur_pose == 2:
                         pygame.quit()
                         sys.exit()

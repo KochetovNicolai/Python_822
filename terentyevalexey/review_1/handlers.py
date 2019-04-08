@@ -1,11 +1,11 @@
 from actions import *
-import pygame
+from gameInfo import *
 
 
 def keydown_handler(event):
     # return to menu on esc
     if event.key == pygame.K_ESCAPE:
-        return 0
+        return GameStatus.menu
     # quit on alt+f4
     elif pygame.key.get_mods() & pygame.KMOD_ALT and \
             event.key == pygame.K_F4:

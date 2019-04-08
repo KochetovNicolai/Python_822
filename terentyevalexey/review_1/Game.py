@@ -4,11 +4,9 @@
 а ещё ему необходимо отдыхать, чтобы не умереть.
 """
 
-import random
-import sys
-from gameInfo import *
 
 if __name__ == '__main__':
+    from gameInfo import *
     from menu import main_menu, options
     from actions import *
     from handlers import *
@@ -67,13 +65,13 @@ def main_loop():
 
 
 if __name__ == '__main__':
-    cur_state = 0
+    cur_state = GameStatus.menu
     while cur_state is not None:
-        if cur_state == 0:
+        if cur_state == GameStatus.menu:
             cur_state = main_menu()
-        elif cur_state == 1:
+        elif cur_state == GameStatus.options:
             cur_state = options()
-        elif cur_state == 2:
+        elif cur_state == GameStatus.loop:
             cur_state = main_loop()
         else:
             break

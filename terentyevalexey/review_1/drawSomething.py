@@ -1,4 +1,4 @@
-from Game import *
+from gameInfo import *
 
 
 def draw_cat():

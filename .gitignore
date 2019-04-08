@@ -116,5 +116,5 @@ dmypy.json
 .pyre/
 
 
-#
+# PyCharm staff
 .idea/

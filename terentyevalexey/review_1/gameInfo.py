@@ -1,7 +1,13 @@
-from singleton import singleton
 import pygame
 import os
 from enum import Enum
+from singleton import singleton
+
+
+class GameStatus(Enum):
+    menu = 0
+    options = 1
+    loop = 2
 
 
 class Animations(Enum):
