@@ -14,10 +14,10 @@ def keydown_handler(event):
     # run on enter
     elif event.key == pygame.K_RETURN or \
             event.key == pygame.K_KP_ENTER:
-        run_cat_run()
+        Actions.run_cat_run()
     # hit bag on space
     elif event.key == pygame.K_SPACE:
-        hit_bag()
+        Actions.hit_bag()
 
 
 def mouse_click_handler():
@@ -27,7 +27,7 @@ def mouse_click_handler():
         mx, my = pygame.mouse.get_pos()
         if (mx > game_info.width * 9) and (
                 game_info.height * 6 < my < game_info.height * 9.5):
-            hit_bag()
+            Actions.hit_bag()
 
 
 def events_handler():
@@ -94,8 +94,8 @@ def cat_pos_handler():
     game_info = GameInfo()
     # if cat walks to bag, he hits it
     if cat.x >= game_info.width * 6.8:
-        hit_bag()
+        Actions.hit_bag()
 
     # if cat walks to the left border he starts running
     if cat.x <= - 2 * game_info.width:
-        run_cat_run()
+        Actions.run_cat_run()

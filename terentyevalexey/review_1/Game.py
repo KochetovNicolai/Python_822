@@ -46,9 +46,9 @@ def main_loop():
 
         # check cat's tiredness and drowsiness
         if cat.sleepy >= 20:
-            sleep()
+            Actions.sleep()
         if cat.tired > 10:
-            return die()
+            return Actions.die()
 
         # event checker
         if events_handler() == GameStatus.menu:
