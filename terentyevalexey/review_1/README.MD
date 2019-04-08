@@ -7,5 +7,5 @@ pygame is required
 
 # Known issues:
 ```
-Only 1 character
+Can't return to menu from game
 ```

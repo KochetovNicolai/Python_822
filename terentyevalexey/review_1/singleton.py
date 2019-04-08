@@ -1,8 +1,9 @@
 def singleton(cls):
-    instances = {}
+    instance = None
 
     def wrapper(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
+        nonlocal instance
+        if instance is None:
+            instance = cls(*args, **kwargs)
+        return instance
     return wrapper
