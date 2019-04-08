@@ -50,18 +50,24 @@ class GameInfo:
         self.arrow = pygame.image.load(os.path.join('data', 'arrow.png'))
         self.bamboo = pygame.image.load(os.path.join('data', 'bamboo.jpg'))
         self.display_inf = pygame.display.Info()
-        self.width = self.display_inf.current_w // 20
-        self.height = self.display_inf.current_h // 20
+        self.logic_size = 10
+        self.reduction_ratio = 2
+        self.width = self.display_inf.current_w // \
+            self.logic_size // self.reduction_ratio
+        self.height = self.display_inf.current_h // \
+            self.logic_size // self.reduction_ratio
+        self.window_width = self.logic_size * self.width
+        self.window_height = self.logic_size * self.height
         self.full_screen = False
         self.tick_rate = 30
-        self.screen = pygame.display.set_mode(
-            (self.width * 10, self.height * 10))
+        self.screen = pygame.display.set_mode((self.window_width,
+                                               self.window_height))
 
 
 @singleton
 class Cat:
     def __init__(self):
-        self.name = "Kitty"
+        self.name = 'Kitty'
         game_info = GameInfo()
         self.x = game_info.width * 4
         self.y = game_info.height * 5
@@ -94,3 +100,22 @@ class Cat:
         if event.type == pygame.USEREVENT + 3:
             if self.cardio > 0:
                 self.cardio -= 1
+
+    def draw(self):
+        game_info = GameInfo()
+        if self.anim_time >= game_info.tick_rate:
+            self.anim_time = 0
+
+        cur_frame = self.anim_time // (
+                game_info.tick_rate //
+                len(self.status.value))
+        self.anim_time += 1
+
+        if cur_frame >= len(self.status.value):
+            self.anim_time = 0
+            return
+        game_info.screen.blit(
+            pygame.transform.scale(self.status.value[cur_frame],
+                                   (game_info.width * 4, game_info.height * 4)),
+            (self.x, self.y))
+        pygame.display.update()

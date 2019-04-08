@@ -7,14 +7,15 @@
 
 if __name__ == '__main__':
     from gameInfo import *
-    from menu import main_menu, options
+    from menu import MainMenu, Options
     from actions import *
     from handlers import *
-    from drawSomething import draw_cat, draw_score
+    from drawSomething import draw_score
 
+    caption = "Cat"
     logo = pygame.image.load(os.path.join('data', 'logo.png'))
     pygame.init()
-    pygame.display.set_caption("cat")
+    pygame.display.set_caption(caption)
     pygame.display.set_icon(logo)
 
 
@@ -22,8 +23,8 @@ def main_loop():
     cat = Cat()
     game_info = GameInfo()
     game_info.screen.blit(
-        pygame.transform.scale(game_info.background,
-                               (game_info.width * 10, game_info.height * 10)),
+        pygame.transform.scale(game_info.background, (game_info.window_width,
+                                                      game_info.window_height)),
         (0, 0))
     clock = pygame.time.Clock()
 
@@ -39,9 +40,9 @@ def main_loop():
         # screen update
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (
-                game_info.width * 10, game_info.height * 10)), (0, 0))
+                game_info.window_width, game_info.window_height)), (0, 0))
         draw_score()
-        draw_cat()
+        cat.draw()
 
         # check cat's tiredness and drowsiness
         if cat.sleepy >= 20:
@@ -69,9 +70,9 @@ if __name__ == '__main__':
     cur_state = GameStatus.menu
     while cur_state is not None:
         if cur_state == GameStatus.menu:
-            cur_state = main_menu()
+            cur_state = MainMenu().loop()
         elif cur_state == GameStatus.options:
-            cur_state = options()
+            cur_state = Options().loop()
         elif cur_state == GameStatus.loop:
             cur_state = main_loop()
         else:

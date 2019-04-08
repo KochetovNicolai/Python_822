@@ -8,8 +8,6 @@ pygame is required
 # Known issues:
 ```
 Needed Enum for menu
-Needed classes Draw and Actions
-Needed defining constants
-Needed button class
-Convert menus into classes
+Needed class Actions
+Needed arrow class
 ```

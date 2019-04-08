@@ -1,7 +1,9 @@
 import sys
 import random
 from gameInfo import *
-from drawSomething import draw_score, draw_cat
+from drawSomething import draw_score
+
+GRAY = (32, 32, 32)
 
 
 def sleep():
@@ -16,10 +18,10 @@ def sleep():
         clock.tick(game_info.tick_rate)
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (
-                game_info.width * 10, game_info.height * 10)),
+                game_info.window_width, game_info.window_height)),
             (0, 0))
         draw_score()
-        draw_cat()
+        cat.draw()
     for cur_time in range(10 * game_info.tick_rate):
         clock.tick(game_info.tick_rate)
         if cur_time % game_info.tick_rate == 0:
@@ -31,7 +33,7 @@ def sleep():
                 return
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (
-                game_info.width * 10, game_info.height * 10)), (0, 0))
+                game_info.window_width, game_info.window_height)), (0, 0))
         draw_score()
         game_info.screen.blit(
             pygame.transform.scale(Animations.sleep.value[6],
@@ -54,19 +56,22 @@ def run_cat_run():
     for _ in range(run_time):
         clock.tick(game_info.tick_rate)
         bamboo_size = game_info.bamboo.get_size()
+        # rescale bamboo picture to fit the screen and move
         game_info.screen.blit(pygame.transform.scale(game_info.bamboo, (
-            game_info.height * 10 * bamboo_size[0] // bamboo_size[1],
-            game_info.height * 10)), (0, 0), (cur_x, 0, cur_x + bamboo_size[1] *
-                                              game_info.width //
-                                              game_info.height, bamboo_size[1]))
-        draw_cat()
-        cat.x += game_info.width * 10 // run_time
-        cur_x += game_info.width * 10 // run_time
+            game_info.window_height * bamboo_size[0] // bamboo_size[1],
+            game_info.window_height)), (0, 0), (cur_x, 0, cur_x +
+                                                bamboo_size[1] *
+                                                game_info.width //
+                                                game_info.height,
+                                                bamboo_size[1]))
+        cat.draw()
+        cat.x += game_info.window_width // run_time
+        cur_x += game_info.window_width // run_time
 
-    game_info.screen.blit(
-        pygame.transform.scale(game_info.background,
-                               (game_info.width * 10, game_info.height * 10)),
-        (0, 0))
+    game_info.screen.blit(pygame.transform.scale(game_info.background,
+                                                 (game_info.window_width,
+                                                  game_info.window_height)),
+                          (0, 0))
 
     cat.x = 4 * game_info.width
     cat.y = 5 * game_info.height
@@ -81,7 +86,7 @@ def run_cat_run():
 def hit_bag():
     cat = Cat()
     game_info = GameInfo()
-    cat.x = game_info.width * 6.8
+    cat.x = int(game_info.width * 6.8)
     if random.randint(1, 2) == 1:
         punching_bag()
     else:
@@ -102,9 +107,9 @@ def punching_bag():
         clock.tick(game_info.tick_rate)
         game_info.screen.blit(
             pygame.transform.scale(game_info.background, (
-                game_info.width * 10, game_info.height * 10)), (0, 0))
+                game_info.window_width, game_info.window_height)), (0, 0))
         draw_score()
-        draw_cat()
+        cat.draw()
 
     cat.muscle += 3
     cat.tired += 2
@@ -118,13 +123,12 @@ def kicking_bag():
     clock = pygame.time.Clock()
     for _ in range(random.randint(2, 4) * game_info.tick_rate):
         clock.tick(game_info.tick_rate)
-        game_info.screen.blit(
-            pygame.transform.scale(game_info.background,
-                                   (game_info.width * 10,
-                                    game_info.height * 10)),
-            (0, 0))
+        game_info.screen.blit(pygame.transform.scale(game_info.background,
+                                                     (game_info.window_width,
+                                                      game_info.window_height)),
+                              (0, 0))
         draw_score()
-        draw_cat()
+        cat.draw()
 
     cat.muscle += 2
     cat.tired += 2
@@ -140,22 +144,21 @@ def die():
     for _ in range(game_info.tick_rate - game_info.tick_rate % len(
             cat.status.value)):
         clock.tick(game_info.tick_rate)
-        game_info.screen.blit(
-            pygame.transform.scale(game_info.background, (
-                game_info.width * 10, game_info.height * 10)), (0, 0))
+        game_info.screen.blit(pygame.transform.scale(game_info.background, (
+            game_info.window_width, game_info.window_height)), (0, 0))
         draw_score()
-        draw_cat()
+        cat.draw()
 
-    font = pygame.font.SysFont("calibri", game_info.height, bold=True)
-    text = font.render("{} is dead".format(cat.name), True, (32, 32, 32))
+    font = pygame.font.SysFont("calibri", game_info.height, True)
+    text = font.render("{} is dead".format(cat.name), True, GRAY)
     text_rect = text.get_rect()
-    text_rect.center = (game_info.width * 5.5, game_info.height * 9)
+    text_rect.center = (int(game_info.width * 5.5), game_info.height * 9)
     game_info.screen.blit(text, text_rect)
 
-    font = pygame.font.SysFont("calibri", game_info.height // 2, bold=True)
-    text = font.render("PRESS ANY KEY TO CONTINUE", True, (32, 32, 32))
+    font = pygame.font.SysFont("calibri", game_info.height // 2, True)
+    text = font.render("PRESS ANY KEY TO CONTINUE", True, GRAY)
     text_rect = text.get_rect()
-    text_rect.center = (game_info.width * 5.5, game_info.height * 9.7)
+    text_rect.center = (int(game_info.width * 5.5), int(game_info.height * 9.7))
     game_info.screen.blit(text, text_rect)
 
     pygame.display.update()
