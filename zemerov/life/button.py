@@ -1,5 +1,6 @@
 import pygame
 import colours
+import field
 
 
 class Button:
@@ -32,3 +33,12 @@ class Button:
                                         False,
                                         self.color)
         return text_surface
+
+    def is_inside(self, mouse_pos):
+        if (
+                self.x < mouse_pos[0] < self.x + Button.widht and
+                self.y < mouse_pos[1] < field.Field().field_size[1]
+        ):
+            return True
+        else:
+            return False
