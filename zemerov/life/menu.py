@@ -48,29 +48,13 @@ class Menu:
             but.draw(surface)
 
     def click(self, pos, state):
-        if state == 'draw' and \
-            field.is_inside(
-                pos,
-                0,
-                button.Button.widht):
+        if state == 'draw' and self.start.is_inside(pos):
             return 'evolution'
-        elif field.is_inside(
-                pos,
-                button.Button.widht,
-                button.Button.widht * 2 + button.Button.margin
-                ):
+        elif self.restart.is_inside(pos):
             return 'restart'
-        elif field.is_inside(
-                pos,
-                button.Button.widht * 2 + button.Button.margin,
-                button.Button.widht * 3 + button.Button.margin * 2
-                ):
+        elif self.quit.is_inside(pos):
             return 'quit'
-        elif field.is_inside(
-                pos,
-                button.Button.widht * 3 + button.Button.margin * 2,
-                button.Button.widht * 4 + button.Button.margin * 3
-                ):
+        elif self.pause.is_inside(pos):
             if state == 'evolution':
                 self.prev_state = state
                 return 'pause'
