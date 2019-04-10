@@ -153,14 +153,3 @@ class Field:
         surface.blit(window, (0, 0))
         game_over_text.draw(surface, is_rect=False)
         score_text.draw(surface, is_rect=False)
-
-
-def is_inside(mouse_pos, left, right, up=Field().field_size[1], down=0):
-    # Проверяет, находится ли курсор внутри области
-    if (
-            left < mouse_pos[0] < right and
-            down < mouse_pos[1] < up
-    ):
-        return True
-    else:
-        return False
