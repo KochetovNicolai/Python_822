@@ -6,6 +6,7 @@ import field
 class Button:
 
     widht = 140
+    height = 30
     margin = 5
 
     def __init__(self, txt, font, font_size, x, y, color=colours.WHITE, background=colours.BLUE):
@@ -37,7 +38,7 @@ class Button:
     def is_inside(self, mouse_pos):
         if (
                 self.x < mouse_pos[0] < self.x + Button.widht and
-                self.y < mouse_pos[1] < field.Field().field_size[1]
+                self.y < mouse_pos[1] < self.y + Button.height
         ):
             return True
         else:
