@@ -13,9 +13,11 @@ class Window:
         self.frame = Frame(self.canvas)
         self.myscrollbar = Scrollbar(self.lowFrame, orient='vertical', command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.myscrollbar.set)
-        self.canvas.create_window((0,0), window = self.frame)
+        self.canvas.create_window((0,0), window=self.frame)
+
         def conf(event):
             self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+
         self.frame.bind('<Configure>', conf)
         self.lowFrame.pack(side='right')
         self.myscrollbar.pack(side='right', fill=Y)
@@ -41,20 +43,14 @@ class Window:
         self.cook = Button(root, image=self.cookie, background='#eafffa', activebackground='#eafffa', bd=0, command=self.updateScore)
         self.cook.place(relx=0.2, rely=0.2)
 
-        self.buttons = [PhotoImage(file=os.path.join('images', 'Button1.png')),
-                        PhotoImage(file=os.path.join('images', 'Button2.png')),
-                        PhotoImage(file=os.path.join('images', 'Button3.png')),
-                        PhotoImage(file=os.path.join('images', 'Button4.png')),
-                        PhotoImage(file=os.path.join('images', 'Button5.png'))]
+        self.buttons = [PhotoImage(file=os.path.join('images', 'Button{}.png'.format(i + 1))) for i in range(5)]
         self.cursors = [ Button(self.frame, image=i, bd=0, background='#eafffa') for i in self.buttons ]
 
 
-        self.price = [[1,20], [3,100], [5,500], [10,3000], [30,10000]]
-        self.k = 0 #для итерации по price
-        for i in self.cursors:
-            self.buy = partial(update.buy, self, self.price[self.k][1], self.price[self.k][0])
-            self.k += 1
-            i.configure(command=self.buy)
+        price = [[1,20], [3,100], [5,500], [10,3000], [30,10000]]
+        for i in enumerate(self.cursors):
+            buy = partial(update.buy, self, price[i[0]][1], price[i[0]][0])
+            i[1].configure(command=buy)
         for i in self.cursors:
             i.pack()
 
@@ -72,10 +68,10 @@ class Update:
             self.score -= cost
             self.autoClicker(object, amount_click)
 
-    def autoClicker(self, object, n):
-        self.score += n
+    def autoClicker(self, object, amount_click):
+        self.score += amount_click
         object.scoreLabel.config(text="Очки: {}".format(self.score))
-        root.after(1000, self.autoClicker, object, n) #30 игровых секунд = 1 секунде (чтобы быстрее проверять работоспособность функции)
+        root.after(1000, self.autoClicker, object, amount_click) #30 игровых секунд = 1 секунде (чтобы быстрее проверять работоспособность функции)
 
 
 
