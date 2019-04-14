@@ -1,1 +1,0 @@
-﻿"Clicker" Run main.py
