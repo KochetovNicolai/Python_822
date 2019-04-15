@@ -85,11 +85,13 @@ class MazeWidget(QWidget):
 			for j in range(maze_width):
 				adj_walls = self._labyrinth.adjacent_walls((i, j))
 				if ((i, j),(i, j+1)) in adj_walls:
-					qp.drawLine(margin_x + (j+1)*tile_size, margin_y + i*tile_size,
-						margin_x + (j+1)*tile_size, margin_y + (i+1)*tile_size)
+					self.drawLabyrinthWall(qp, i, j, i, j+1, tile_size, margin_x, margin_y)
 				if ((i, j),(i+1, j)) in adj_walls:
-					qp.drawLine(margin_x + j*tile_size, margin_y + (i+1)*tile_size,
-						margin_x + (j+1)*tile_size, margin_y + (i+1)*tile_size)
+					self.drawLabyrinthWall(qp, i, j, i+1, j, tile_size, margin_x, margin_y)
+
+	def drawLabyrinthWall(self, qp, x1, y1, x2, y2, tile_size, margin_x, margin_y):
+                qp.drawLine(margin_x + y2*tile_size, margin_y + x2*tile_size,
+                            margin_x + (y1+1)*tile_size, margin_y + (x1+1)*tile_size)
 
 
 # Panel in the top of window
@@ -186,12 +188,13 @@ class TopPanel(QFrame):
 		layout.addWidget(self._generate_button)
 		layout.addStretch()
 
+
 # Central widget in MainWindow
 class MainWidget(QWidget):
-	def __init__(self):
+	def __init__(self, size):
 		super().__init__()
 		self._maze_widget = MazeWidget()
-		self._maze_widget.setMinimumSize(700, 700)
+		self._maze_widget.setMinimumSize(size, size)
 		self._top_panel = TopPanel(self._maze_widget)
 
 		self._scroll_area = QScrollArea()
@@ -227,8 +230,9 @@ class MainWidget(QWidget):
 class MainWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
-		self._main_widget = MainWidget()
-		self._main_widget.setMinimumSize(700, 700)
+		self._min_size = 700
+		self._main_widget = MainWidget(self._min_size)
+		self._main_widget.setMinimumSize(self._min_size, self._min_size)
 		self.setCentralWidget(self._main_widget)
 		self.setWindowTitle('Maze generator')
 		self.show()
