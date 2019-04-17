@@ -165,6 +165,8 @@ class HighlightedCellButton(TextButton):
             self.face_color = arcade.color.YELLOW
         elif but_type == 'attack':
             self.face_color = arcade.color.RED
+        elif but_type == 'attack_base':
+            self.face_color = arcade.color.BLUE
 
         self.but_type = but_type
         self.action_function = action_function
@@ -184,6 +186,8 @@ class HighlightedCellButton(TextButton):
             if self.but_type == 'move':
                 self.action_function(self.x, self.y, self.unit_x, self.unit_y, self.player_nickname, self.cell_size)
             elif self.but_type == 'attack':
+                self.action_function(self.x, self.y, self.unit_x, self.unit_y)
+            elif self.but_type == 'attack_base':
                 self.action_function(self.x, self.y, self.unit_x, self.unit_y)
 
 

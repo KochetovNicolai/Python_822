@@ -71,7 +71,36 @@ class Fraction:
         else:
             return False
 
-    def hit_unit(self, attacking_unit_x, attacking_unit_y, def_unit_x, def_unit_y):
+    def hit_base(self, base_x, base_y, attacking_unit_x, attacking_unit_y):
+        attacking_unit = None
+        attacking_player = None
+
+        base = None
+        defending_player = None
+
+        for i in self.player_list:
+            for j in i.unit_list:
+                if (j.unit_place[0] - 1 == attacking_unit_x) and (j.unit_place[1] - 1 == attacking_unit_y):
+                    attacking_player = i
+                    attacking_unit = j
+                    attacking_unit.participated_in_turn = True
+            if (i.base.place[0] == base_x) and (i.base.place[1] == base_y) and (not i == attacking_player):
+                base = i.base
+                defending_player = i
+
+        self.highlighted_cells_list = []
+        if attacking_unit is not None:
+            base.hit_points -= attacking_unit.damage
+
+        for j in self.button_list:
+            if j.pressed:
+                j.pressed = False
+
+        if (base.hit_points <= 0) and (base is not None):
+            self.next_turn = True
+            self.player_list.remove(defending_player)
+
+    def hit_unit(self, def_unit_x, def_unit_y, attacking_unit_x, attacking_unit_y):
         defending_unit = None
         attacking_unit = None
 
@@ -83,28 +112,29 @@ class Fraction:
 
         for i in self.player_list:
             for j in i.unit_list:
-                if (j.unit_place[0] - 1 == def_unit_x) and (j.unit_place[1] - 1 == def_unit_y):
-                    defending_player = i
-                    defending_unit = j
-                    defending_unit.participated_in_turn = True
                 if (j.unit_place[0] - 1 == attacking_unit_x) and (j.unit_place[1] - 1 == attacking_unit_y):
                     attacking_player = i
                     attacking_unit = j
+                    attacking_unit.participated_in_turn = True
+                if (j.unit_place[0] - 1 == def_unit_x) and (j.unit_place[1] - 1 == def_unit_y):
+                    defending_player = i
+                    defending_unit = j
             for j in i.button_list:
                 if j.pressed:
                     j.pressed = False
-                if (j.x - 1 == def_unit_x) and (j.y - 1 == def_unit_y):
-                    defending_unit_button = j
-                    j.pressed = False
                 if (j.x - 1 == attacking_unit_x) and (j.y - 1 == attacking_unit_y):
                     attacking_unit_button = j
+                    j.pressed = False
+                if (j.x - 1 == def_unit_x) and (j.y - 1 == def_unit_y):
+                    defending_unit_button = j
 
         self.highlighted_cells_list = []
         death = False
-        if attacking_unit is not None:
-            attacking_unit.hp -= defending_unit.damage * attacking_unit.defense
+
         if defending_unit is not None:
-            defending_unit.hp -= defending_unit.damage * attacking_unit.reflection
+            defending_unit.hp -= attacking_unit.damage * defending_unit.defense
+        if attacking_unit is not None:
+            attacking_unit.hp -= attacking_unit.damage * defending_unit.reflection
 
         death += self.if_unit_is_dead(attacking_player, attacking_unit, attacking_unit_button)
         death += self.if_unit_is_dead(defending_player, defending_unit, defending_unit_button)
@@ -112,10 +142,10 @@ class Fraction:
         if death:
             return
 
-        if defending_unit is not None:
-            defending_unit.hp -= attacking_unit.damage * defending_unit.defense
         if attacking_unit is not None:
-            attacking_unit.hp -= attacking_unit.damage * defending_unit.reflection
+            attacking_unit.hp -= defending_unit.damage * attacking_unit.defense
+        if defending_unit is not None:
+            defending_unit.hp -= defending_unit.damage * attacking_unit.reflection
 
         self.if_unit_is_dead(defending_player, defending_unit, defending_unit_button)
         self.if_unit_is_dead(attacking_player, attacking_unit, attacking_unit_button)
@@ -179,29 +209,6 @@ class Fraction:
         if len(self.units_behave_list) == 0:
             self.next_turn = True
 
-    def create_highlighted_cell(self, center_x, center_y, button_action, nickname, x, y, unit_x, unit_y, cell_size):
-        return UI.HighlightedCellButton(center_x,
-                                        center_y,
-                                        button_action,
-                                        '',
-                                        nickname,
-                                        x,
-                                        y,
-                                        unit_x,
-                                        unit_y, cell_size, 'move')
-
-    def create_highlighted_attack_cell(self, center_x, center_y, button_action, nickname, x, y,
-                                unit_x, unit_y, cell_size):
-        return UI.HighlightedCellButton(center_x,
-                                              center_y,
-                                              button_action,
-                                              '',
-                                              nickname,
-                                              x,
-                                              y,
-                                              unit_x,
-                                              unit_y, cell_size, 'attack')
-
     def on_release_unit_button(self):
         self.unit_info = UI.Text('', self.height * self.unit_info_y_coef, self.width * self.unit_info_x_coef)
         self.highlighted_cells_list = []
@@ -222,23 +229,42 @@ class Fraction:
             find = self.seek_for_empty_slot(x, y, add_highlighted_cells, True)
             if find:
                 for i in add_highlighted_cells:
-                    self.highlighted_cells_list.append(self.create_highlighted_cell(count_coordinates_x(x + i[0], cell_size),
-                                                                                    count_coordinates_y(y + i[1], cell_size),
-                                                                                    self.on_push_highlighted_cell,
-                                                                                    nickname, x + i[0] - 1, y + i[1] - 1, x - 1, y - 1,
-                                                                                    cell_size))
+                    self.highlighted_cells_list.append(UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
+                                                                                count_coordinates_y(y + i[1], cell_size),
+                                                                                self.on_push_highlighted_cell, '',
+                                                                                nickname, x + i[0] - 1, y + i[1] - 1,
+                                                                                x - 1, y - 1,
+                                                                                cell_size, 'move'))
             add_highlighted_attack_cells = []
             find_sth_to_attack = self.seek_for_empty_slot(x, y, add_highlighted_attack_cells, False)
             if find_sth_to_attack:
                 for i in add_highlighted_attack_cells:
                     friendly_fire = False
+                    base_attack = False
+
                     for j in self.unit_list:
                         if (j.unit_place[0] == x + i[0]) and (j.unit_place[1] == y + i[1]):
                             friendly_fire = True
-                    if not friendly_fire:
-                        self.highlighted_cells_list.append(self.create_highlighted_attack_cell(count_coordinates_x(x + i[0], cell_size),
-                                                                                               count_coordinates_y(y + i[1], cell_size), self.hit_unit,
-                                                                                               nickname, x + i[0] - 1, y + i[1] - 1, x - 1, y - 1, cell_size))
+
+                    for j in self.player_list:
+                        if (j.base.place[0] == x + i[0]) and (j.base.place[1] == y + i[1]):
+                            base_attack = True
+                    if (not friendly_fire) and (not base_attack):
+                        self.highlighted_cells_list.append(
+                            UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
+                                                     count_coordinates_y(y + i[1], cell_size),
+                                                     self.hit_unit, '',
+                                                     nickname, x + i[0] - 1, y + i[1] - 1,
+                                                     x - 1, y - 1,
+                                                     cell_size, 'attack'))
+                    if base_attack and (not (self.base.place[0] == x + i[0] and (self.base.place[1] == y + i[1]))):
+                        self.highlighted_cells_list.append(
+                            UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
+                                                     count_coordinates_y(y + i[1], cell_size),
+                                                     self.hit_base, '',
+                                                     nickname, x + i[0], y + i[1],
+                                                     x - 1, y - 1,
+                                                     cell_size, 'attack_base'))
 
     def count_units(self, text):
         print('{} имеют {} юнитов'.format(text, self.units.amount))
@@ -248,7 +274,7 @@ class Fraction:
         s += 'Фракция: {}\n'.format(text)
         for i in self.unit_list:
             s += 'Юнит: {}, урон: {}, хп: {}, клетка: {}\n'.format(i.type, i.damage, i.hp, i.unit_place)
-        s += 'Местоположение базы: {}\n'.format(self.base.place)
+        s += 'Местоположение базы: {}, хп: {}\n'.format(self.base.place, self.base.hit_points)
         s += '{} имеют {} юнитов\n'.format(text, self.units.amount)
         s += 'Всего денег {}'.format(self.money)
         return s

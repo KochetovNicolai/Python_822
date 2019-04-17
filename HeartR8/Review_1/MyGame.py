@@ -170,6 +170,11 @@ class MyGame(arcade.Window):
             self.field.field_info = [[None for i in range(self.field.size)] for j in range(self.field.size)]
 
             for i in self.player_list:
+
+                if i.next_turn:
+                    i.next_turn = False
+                    self.next_player()
+
                 for j in i.button_list:
                     j.player_now = self.player_list[self.turn].name
                     self.unit_list.append(j)
@@ -186,10 +191,6 @@ class MyGame(arcade.Window):
 
                 i.player_list = self.player_list
                 i.field_info = self.field.field_info[:]
-
-                if i.next_turn and (i.money == 0):
-                    i.next_turn = False
-                    self.next_player()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         UI.check_mouse_press_for_buttons(x, y, self.button_list)
@@ -230,8 +231,9 @@ class MyGame(arcade.Window):
         self.next_player()
 
     def next_player(self):
-        for i in self.player_list[self.turn].unit_list:
-            i.participated_in_turn = True
+        if self.turn < len(self.player_list):
+            for i in self.player_list[self.turn].unit_list:
+                i.participated_in_turn = True
         self.turn += 1
         if self.turn >= len(self.player_list):
             self.turn = 0
