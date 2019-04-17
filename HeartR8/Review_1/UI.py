@@ -109,8 +109,8 @@ class TextButton:
 
 
 class StartTextButton(TextButton):
-    def __init__(self, center_x, center_y, action_function, text):
-        super().__init__(center_x, center_y, 180, 40, text, 18, "Arial")
+    def __init__(self, center_x, center_y, action_function, text, size_x=180, size_y=40):
+        super().__init__(center_x, center_y, size_x, size_y, text, 18, "Arial")
         self.action_function = action_function
 
     def on_release(self):
@@ -119,8 +119,8 @@ class StartTextButton(TextButton):
 
 
 class CreateUnitButton(TextButton):
-    def __init__(self, center_x, center_y, action_function, unit_type,  text, cell_size, base_position):
-        super().__init__(center_x, center_y, 150, 40, text, 18, "Arial")
+    def __init__(self, center_x, center_y, size_x, size_y, action_function, unit_type, text, cell_size, base_position):
+        super().__init__(center_x, center_y, size_x, size_y, text, 18, "Arial")
         self.action_function = action_function
         self.unit_type = unit_type
         self.cell_size = cell_size
@@ -157,8 +157,16 @@ class UnitButton(TextButton):
 
 
 class HighlightedCellButton(TextButton):
-    def __init__(self, center_x, center_y, action_function, text, nickname, x, y, unit_x, unit_y, cell_size):
-        super().__init__(center_x, center_y, 40, 40, text, 8, "Arial", face_color=arcade.color.YELLOW)
+    def __init__(self, center_x, center_y, action_function, text, nickname,
+                 x, y, unit_x, unit_y, cell_size, but_type):
+        super().__init__(center_x, center_y, 40, 40, text, 8, "Arial")
+
+        if but_type == 'move':
+            self.face_color = arcade.color.YELLOW
+        elif but_type == 'attack':
+            self.face_color = arcade.color.RED
+
+        self.but_type = but_type
         self.action_function = action_function
         self.player_nickname = nickname
         self.player_now = ''
@@ -173,28 +181,10 @@ class HighlightedCellButton(TextButton):
     def on_release(self):
         if self.player_nickname == self.player_now:
             super().on_release()
-            self.action_function(self.x, self.y, self.unit_x, self.unit_y, self.player_nickname, self.cell_size)
-
-
-class HighlightedAttackCellButton(TextButton):
-    def __init__(self, center_x, center_y, action_function, text, nickname, x, y, unit_x, unit_y, cell_size, players_list):
-        super().__init__(center_x, center_y, 40, 40, text, 8, "Arial", face_color=arcade.color.RED)
-        self.action_function = action_function
-        self.player_nickname = nickname
-        self.player_now = ''
-        self.x = x
-        self.y = y
-        self.cell_size = cell_size
-        self.unit_x = unit_x
-        self.unit_y = unit_y
-        self.center_x = center_x
-        self.center_y = center_y
-        self.players_list = players_list
-
-    def on_release(self):
-        if self.player_nickname == self.player_now:
-            super().on_release()
-            self.action_function(self.x, self.y, self.unit_x, self.unit_y, self.players_list )
+            if self.but_type == 'move':
+                self.action_function(self.x, self.y, self.unit_x, self.unit_y, self.player_nickname, self.cell_size)
+            elif self.but_type == 'attack':
+                self.action_function(self.x, self.y, self.unit_x, self.unit_y)
 
 
 class FractionChooseButton(TextButton):

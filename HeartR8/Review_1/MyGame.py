@@ -7,19 +7,17 @@ import pygame
 
 
 class MyGame(arcade.Window):
-    def __init__(self, width, height, field_size, player_list, name_list):
+    def __init__(self, field_size, player_list, name_list):
         pygame.mixer.init()
         pygame.mixer.music.load('Background_music.wav')
         pygame.mixer.music.play(-1)
-        super().__init__(width, height)
+        super().__init__(title="School battle", resizable=True, fullscreen=True)
         arcade.set_background_color(arcade.color.WHITE)
         self.name_list = name_list
-        self.width = width
-        self.height = height
         self.pause = False
         self.button_list = None
         self.player_list = player_list
-        self.field = GameField.GameField(min(width, height) // 4 * 3, field_size)
+        self.field = GameField.GameField(min(self.width, self.height) // 4 * 3, field_size)
         self.turn = 0
         self.unit_list = []
         self.highlighted_cells = []
@@ -36,43 +34,72 @@ class MyGame(arcade.Window):
                                'Тусовщики',
                                'Ботаны',]
 
+        self.frac_choose_but_between_center = 50
+        self.frac_choose_but_x_coef = 0.5
+        self.frac_choose_but_y_coef = 0.5
+        self.upper_than_frac_ch_but = 150
+
+        self.start_menu_buttons_amount = 4
+
+        self.add_money = 20
+
+        self.information_txt_x_coef = 0.6
+        self.information_txt_y_coef = 0.75
+
+        self.unit_but_x_coef = 0.8
+        self.unit_but_y_coef = 0.75
+        self.unit_but_between = 100
+        self.units_amount = 4
+        self.unit_but_size_x = 200
+        self.unit_but_size_y = 60
+
+        self.left_menu_but_pos = 120
+        self.delta_menu_but = 250
+        self.bottom_menu_but = 30
+        self.menu_but_size_x = 200
+        self.menu_but_size_y = 50
+
     def setup(self):
         self.button_list = []
         self.background = arcade.load_texture("BG2.jpg")
 
-        quit_button = UI.StartTextButton(100, 30, self.close_program, "Выход")
+        quit_button = UI.StartTextButton(self.left_menu_but_pos, self.bottom_menu_but,
+                                         self.close_program, "Выход",
+                                         self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(quit_button)
 
-        next_button = UI.StartTextButton(300, 30, self.next_player, "Следующий игрок")
+        next_button = UI.StartTextButton(self.left_menu_but_pos + self.delta_menu_but, self.bottom_menu_but,
+                                         self.next_player, "Следующий игрок",
+                                         self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(next_button)
 
-        play_button = UI.StartTextButton(500, 30, self.refresh_program, "Обновить")
+        play_button = UI.StartTextButton(self.left_menu_but_pos + self.delta_menu_but * 2, self.bottom_menu_but,
+                                         self.refresh_program, "Обновить",
+                                         self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(play_button)
 
-        start_game_button = UI.StartTextButton(700, 30, self.start_game_program, "Старт")
+        start_game_button = UI.StartTextButton(self.left_menu_but_pos + self.delta_menu_but * 3, self.bottom_menu_but,
+                                               self.start_game_program, "Старт",
+                                               self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(start_game_button)
 
-        self.player_list[0] = self.frac_list[0](self.field.size)
+        self.player_list[0] = self.frac_list[0](self.field.size, self.width, self.height)
 
-        create_unit_1_button = UI.CreateUnitButton(1000, 450, self.player_list[0].create_unit,
-                                                   Game_classes.Zek, '', self.field.cell_size, self.player_list[0].base.place)
-        self.button_list.append(create_unit_1_button)
-
-        create_unit_2_button = UI.CreateUnitButton(1000, 400, self.player_list[0].create_unit,
-                                                   Game_classes.Bariga, '', self.field.cell_size, self.player_list[0].base.place)
-        self.button_list.append(create_unit_2_button)
-
-        create_unit_3_button = UI.CreateUnitButton(1000, 350, self.player_list[0].create_unit,
-                                                   Game_classes.Offnik, '', self.field.cell_size, self.player_list[0].base.place)
-        self.button_list.append(create_unit_3_button)
-
-        create_unit_4_button = UI.CreateUnitButton(1000, 300, self.player_list[0].create_unit,
-                                                   Game_classes.Bydlan, '', self.field.cell_size, self.player_list[0].base.place)
-        self.button_list.append(create_unit_4_button)
+        for i in range(self.units_amount):
+            create_unit_button = UI.CreateUnitButton(self.width * self.unit_but_x_coef,
+                                                     self.height * self.unit_but_y_coef - i * self.unit_but_between,
+                                                     self.unit_but_size_x,
+                                                     self.unit_but_size_y,
+                                                     self.player_list[0].create_unit,
+                                                     Game_classes.Offnik,
+                                                     '',
+                                                     self.field.cell_size,
+                                                     self.player_list[0].base.place)
+            self.button_list.append(create_unit_button)
 
         for i in range(len(self.frac_list)):
-            self.fraction_choose_buttons_list.append(UI.FractionChooseButton(self.width // 2,
-                                                                             self.height // 2 - 100 + 50 * i,
+            self.fraction_choose_buttons_list.append(UI.FractionChooseButton(self.width * self.frac_choose_but_x_coef,
+                                                                             self.height * self.frac_choose_but_y_coef + self.frac_choose_but_between_center * 2 - self.frac_choose_but_between_center * i,
                                                                              self.create_fraction,
                                                                              self.frac_list[i],
                                                                              self.fraction_names[i]))
@@ -88,37 +115,41 @@ class MyGame(arcade.Window):
                 for button in self.button_list:
                     button.draw()
             else:
-                for button in range(len(self.button_list) - 4):
+                for button in range(len(self.button_list) - self.start_menu_buttons_amount):
                     self.button_list[button].draw()
 
             for button in self.unit_list:
                 button.draw()
 
-            for button in self.highlighted_cells:
-                button.draw()
-
             if self.game_started:
-                for i in range(len(self.button_list) - 4, len(self.button_list)):
+                for i in range(len(self.button_list) - self.start_menu_buttons_amount, len(self.button_list)):
                     self.button_list[i].action_function = self.player_list[self.turn].create_unit
-                    temporary = self.player_list[self.turn].name_units[i - len(self.button_list) + 4]
+                    temporary = self.player_list[self.turn].name_units[i - len(self.button_list) + self.start_menu_buttons_amount]
                     self.button_list[i].unit_type = temporary
-                    temporary = self.player_list[self.turn].name_units_text[i - len(self.button_list) + 4]
+                    temporary = self.player_list[self.turn].name_units_text[i - len(self.button_list) + self.start_menu_buttons_amount]
                     self.button_list[i].text = temporary
                     temporary = self.player_list[self.turn].base.place
                     self.button_list[i].base_position = temporary
 
+            delta_size_pix = 5
+
             for i in self.player_list:
-                arcade.draw_rectangle_filled(i.base.place[0] * self.field.cell_size + 10 - self.field.cell_size // 2,
-                                             i.base.place[1] * self.field.cell_size + 100 - self.field.cell_size // 2,
-                                             self.field.cell_size - 5,
-                                             self.field.cell_size - 5,
+                arcade.draw_rectangle_filled(i.base.place[0] * self.field.cell_size + self.field.left_border - self.field.cell_size // 2,
+                                             i.base.place[1] * self.field.cell_size + self.field.bottom_border - self.field.cell_size // 2,
+                                             self.field.cell_size - delta_size_pix,
+                                             self.field.cell_size - delta_size_pix,
                                              color=arcade.color.GRAY_ASPARAGUS)
                 base_owner = UI.Text(i.name,
-                                     i.base.place[1] * self.field.cell_size + 100 - self.field.cell_size // 2,
-                                     i.base.place[0] * self.field.cell_size + 10 - self.field.cell_size // 2)
+                                     i.base.place[1] * self.field.cell_size + self.field.bottom_border - self.field.cell_size // 2,
+                                     i.base.place[0] * self.field.cell_size + self.field.left_border - self.field.cell_size // 2)
                 base_owner.draw_text()
 
-            information_txt = UI.Text(self.player_list[self.turn].info_about_units(), 450, 700,
+            for button in self.highlighted_cells:
+                button.draw()
+
+            information_txt = UI.Text(self.player_list[self.turn].info_about_units(),
+                                      self.height * self.information_txt_y_coef,
+                                      self.width * self.information_txt_x_coef,
                                       font=16)
             information_txt.draw_text()
 
@@ -126,32 +157,36 @@ class MyGame(arcade.Window):
         else:
             for button in self.fraction_choose_buttons_list:
                 button.draw()
-                text = UI.Text('Игрок {}'.format(self.turn + 1), self.height // 2 + 150, self.width // 2)
+                text = UI.Text('Игрок {}'.format(self.turn + 1),
+                               self.height * self.frac_choose_but_x_coef + self.upper_than_frac_ch_but,
+                               self.width * self.frac_choose_but_y_coef)
                 text.draw_text()
 
     def update(self, delta_time):
         if self.game_started:
+
             self.unit_list = []
+            self.highlighted_cells = []
+            self.field.field_info = [[None for i in range(self.field.size)] for j in range(self.field.size)]
+
             for i in self.player_list:
                 for j in i.button_list:
                     j.player_now = self.player_list[self.turn].name
                     self.unit_list.append(j)
-            self.highlighted_cells = []
-            for i in self.player_list:
+
                 for j in i.highlighted_cells_list:
                     j.player_now = self.player_list[self.turn].name
                     self.highlighted_cells.append(j)
-            self.field.field_info = [[None for i in range(self.field.size)] for j in range(self.field.size)]
-            for i in self.player_list:
+
                 for j in range(0, len(i.unit_list)):
                     self.field.field_info[i.unit_list[j].unit_place[0] - 1][i.unit_list[j].unit_place[1] - 1] = \
                         [i.name, 'Unit', j]
-            for i in self.player_list:
+
                 self.field.field_info[i.base.place[0] - 1][i.base.place[1] - 1] = [i.name, 'Base']
-            for i in self.player_list:
+
                 i.player_list = self.player_list
                 i.field_info = self.field.field_info[:]
-            for i in self.player_list:
+
                 if i.next_turn and (i.money == 0):
                     i.next_turn = False
                     self.next_player()
@@ -187,11 +222,11 @@ class MyGame(arcade.Window):
             self.place_bases(i)
 
     def create_fraction(self, fraction):
-        self.player_list[self.turn] = fraction(self.field.size)
+        self.player_list[self.turn] = fraction(self.field.size, self.width, self.height)
         self.player_list[self.turn].name = self.name_list[self.turn]
         self.place_bases(self.turn)
         if self.turn == 0:
-            self.player_list[self.turn].money = 2
+            self.player_list[self.turn].money = self.add_money
         self.next_player()
 
     def next_player(self):
@@ -201,8 +236,9 @@ class MyGame(arcade.Window):
         if self.turn >= len(self.player_list):
             self.turn = 0
             self.fractions_chosen = True
+            self.fraction_choose_buttons_list = []
         if self.game_started:
-            self.player_list[self.turn].money += 2
+            self.player_list[self.turn].money += self.add_money
             self.player_list[self.turn].units_behave_list = []
             for i in self.player_list[self.turn].unit_list:
                 self.player_list[self.turn].units_behave_list.append(i)

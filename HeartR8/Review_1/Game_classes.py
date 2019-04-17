@@ -1,6 +1,5 @@
 import Base
 import UI
-import pygame
 
 
 def count_coordinates_x(x, cell_size):
@@ -24,153 +23,155 @@ class Units:
 
 
 class Fraction:
-    def __init__(self, field_size):
+    def __init__(self, field_size, width, height):
         self.base = Base.Base()
+
         self.name = ''
         self.fraction_name = ''
+
         self.units = Units()
+
         self.unit_list = []
         self.name_units = []
         self.button_list = []
         self.name_units_text = []
         self.highlighted_cells_list = []
         self.player_list = []
-        self.unit_info = UI.Text('', 100, 700)
-        self.field_size = field_size
+        self.units_behave_list = []
         self.field_info = [[None for i in range(field_size)] for j in range(field_size)]
+
+        self.field_size = field_size
         self.next_turn = False
         self.sound = False
-        self.units_behave_list = []
         self.money = 0
 
-    def unit_button(self, x, y, cell_size, nickname, k):
+        self.width = width
+        self.height = height
+
+        self.unit_info_x_coef = 0.6
+        self.unit_info_y_coef = 0.2
+
+        self.unit_info = UI.Text('', self.width * self.unit_info_x_coef, self.height * self.unit_info_y_coef)
+
+    def add_unit_button(self, x, y, cell_size, nickname, k):
         self.unit_list[k]. \
             unit_button = UI.UnitButton(x, y, count_coordinates_x(x, cell_size),
                                         count_coordinates_y(y, cell_size),
-                                        self.push_unit_button,
-                                        self.release_unit_button,
+                                        self.on_push_unit_button,
+                                        self.on_release_unit_button,
                                         self.unit_list[k].type,
                                         nickname, cell_size)
         self.button_list.append(self.unit_list[k].unit_button)
 
-    def hit_unit(self, x, y, unit_x, unit_y, player_list):
-        unit1 = None
-        unit2 = None
+    def if_unit_is_dead(self, player, unit, unit_button):
+        if unit.hp <= 0:
+            player.unit_list.remove(unit)
+            player.button_list.remove(unit_button)
+            return True
+        else:
+            return False
 
-        player_1 = None
-        player_2 = None
+    def hit_unit(self, attacking_unit_x, attacking_unit_y, def_unit_x, def_unit_y):
+        defending_unit = None
+        attacking_unit = None
 
-        unit_button_1 = None
-        unit_button_2 = None
+        defending_player = None
+        attacking_player = None
+
+        defending_unit_button = None
+        attacking_unit_button = None
 
         for i in self.player_list:
             for j in i.unit_list:
-                if (j.unit_place[0] - 1 == unit_x) and (j.unit_place[1] - 1 == unit_y):
-                    player_1 = i
-                    unit1 = j
-                    unit1.participated_in_turn = True
-                if (j.unit_place[0] - 1 == x) and (j.unit_place[1] - 1 == y):
-                    player_2 = i
-                    unit2 = j
+                if (j.unit_place[0] - 1 == def_unit_x) and (j.unit_place[1] - 1 == def_unit_y):
+                    defending_player = i
+                    defending_unit = j
+                    defending_unit.participated_in_turn = True
+                if (j.unit_place[0] - 1 == attacking_unit_x) and (j.unit_place[1] - 1 == attacking_unit_y):
+                    attacking_player = i
+                    attacking_unit = j
             for j in i.button_list:
                 if j.pressed:
                     j.pressed = False
-                if (j.x - 1 == unit_x) and (j.y - 1 == unit_y):
-                    unit_button_1 = j
+                if (j.x - 1 == def_unit_x) and (j.y - 1 == def_unit_y):
+                    defending_unit_button = j
                     j.pressed = False
-                if (j.x - 1 == x) and (j.y - 1 == y):
-                    unit_button_2 = j
+                if (j.x - 1 == attacking_unit_x) and (j.y - 1 == attacking_unit_y):
+                    attacking_unit_button = j
 
         self.highlighted_cells_list = []
+        death = False
+        if attacking_unit is not None:
+            attacking_unit.hp -= defending_unit.damage * attacking_unit.defense
+        if defending_unit is not None:
+            defending_unit.hp -= defending_unit.damage * attacking_unit.reflection
 
-        death = 0
-        unit2.hp -= unit1.damage * unit2.defense
-        unit1.hp -= unit1.damage * unit2.reflection
+        death += self.if_unit_is_dead(attacking_player, attacking_unit, attacking_unit_button)
+        death += self.if_unit_is_dead(defending_player, defending_unit, defending_unit_button)
 
-        if unit2.hp <= 0:
-            player_2.unit_list.remove(unit2)
-            player_2.button_list.remove(unit_button_2)
-            death = 1
-
-        if unit1.hp <= 0:
-            player_1.unit_list.remove(unit1)
-            player_1.button_list.remove(unit_button_1)
-            death = 1
-
-        if death == 1:
+        if death:
             return
 
-        unit1.hp -= unit2.damage * unit1.defense
-        unit2.hp -= unit2.damage * unit1.reflection
+        if defending_unit is not None:
+            defending_unit.hp -= attacking_unit.damage * defending_unit.defense
+        if attacking_unit is not None:
+            attacking_unit.hp -= attacking_unit.damage * defending_unit.reflection
 
-        if unit1.hp <= 0:
-            player_1.unit_list.remove(unit1)
-            player_1.button_list.remove(unit_button_1)
+        self.if_unit_is_dead(defending_player, defending_unit, defending_unit_button)
+        self.if_unit_is_dead(attacking_player, attacking_unit, attacking_unit_button)
+        return
 
-        if unit2.hp <= 0:
-            player_2.unit_list.remove(unit2)
-            player_2.button_list.remove(unit_button_2)
+    def seek_for_empty_slot(self, x, y, add_pos, check):
+        seek = False
+        if (y < self.field_size) and \
+           ((self.field_info[x - 1][y] is None) == check):
+            add_pos.append([0, 1])
+            seek = True
+        if (x < self.field_size) and \
+           ((self.field_info[x][y - 1] is None) == check):
+            add_pos.append([1, 0])
+            seek = True
+        if (y > 1) and \
+           ((self.field_info[x - 1][y - 2] is None) == check):
+            add_pos.append([0, -1])
+            seek = True
+        if (x > 1) and \
+           ((self.field_info[x - 2][y - 1] is None) == check):
+            add_pos.append([-1, 0])
+            seek = True
+        return seek
 
     def create_unit(self, unit_type, cell_size, base_position):
         if self.money >= unit_type().price:
-            self.money -= unit_type().price
             # if (len(self.unit_list) == 10) and (not self.sound):
             #     sound = pygame.mixer.Sound('Easter_egg.wav')
             #     sound.play()
             #     self.sound = True
-            if base_position != [-100, -100]:
-                if (base_position[1] < self.field_size) and \
-                     (self.field_info[base_position[0] - 1][base_position[1]] is None):
+            if not self.base.destroyed:
+                add_pos = []
+                find = self.seek_for_empty_slot(self.base.place[0], self.base.place[1], add_pos, True)
+                if find:
+                    self.money -= unit_type().price
                     self.units.amount += 1
                     self.unit_list.append(unit_type())
                     self.unit_list[len(self.unit_list) - 1].participated_in_turn = True
-                    self.unit_list[len(self.unit_list) - 1].unit_place[0] = base_position[0]
-                    self.unit_list[len(self.unit_list) - 1].unit_place[1] = base_position[1] + 1
-                    self.unit_button(self.unit_list[len(self.unit_list) - 1].unit_place[0],
-                                     self.unit_list[len(self.unit_list) - 1].unit_place[1],
-                                     cell_size, self.name, len(self.unit_list) - 1)
-                elif (base_position[0] < self.field_size) and \
-                        (self.field_info[base_position[0]][base_position[1] - 1] is None):
-                    self.units.amount += 1
-                    self.unit_list.append(unit_type())
-                    self.unit_list[len(self.unit_list) - 1].participated_in_turn = True
-                    self.unit_list[len(self.unit_list) - 1].unit_place[0] = base_position[0] + 1
-                    self.unit_list[len(self.unit_list) - 1].unit_place[1] = base_position[1]
-                    self.unit_button(self.unit_list[len(self.unit_list) - 1].unit_place[0],
-                                     self.unit_list[len(self.unit_list) - 1].unit_place[1],
-                                     cell_size, self.name, len(self.unit_list) - 1)
-                elif (base_position[1] > 1) and \
-                        (self.field_info[base_position[0] - 1][base_position[1] - 2] is None):
-                    self.units.amount += 1
-                    self.unit_list.append(unit_type())
-                    self.unit_list[len(self.unit_list) - 1].participated_in_turn = True
-                    self.unit_list[len(self.unit_list) - 1].unit_place[0] = base_position[0]
-                    self.unit_list[len(self.unit_list) - 1].unit_place[1] = base_position[1] - 1
-                    self.unit_button(self.unit_list[len(self.unit_list) - 1].unit_place[0],
-                                     self.unit_list[len(self.unit_list) - 1].unit_place[1],
-                                     cell_size, self.name, len(self.unit_list) - 1)
-                elif (base_position[0] > 1) and \
-                        (self.field_info[base_position[0] - 2][base_position[1] - 1] is None):
-                    self.units.amount += 1
-                    self.unit_list.append(unit_type())
-                    self.unit_list[len(self.unit_list) - 1].participated_in_turn = True
-                    self.unit_list[len(self.unit_list) - 1].unit_place[0] = base_position[0] - 1
-                    self.unit_list[len(self.unit_list) - 1].unit_place[1] = base_position[1]
-                    self.unit_button(self.unit_list[len(self.unit_list) - 1].unit_place[0],
-                                     self.unit_list[len(self.unit_list) - 1].unit_place[1],
-                                     cell_size, self.name, len(self.unit_list) - 1)
+                    self.unit_list[len(self.unit_list) - 1].unit_place[0] = base_position[0] + add_pos[0][0]
+                    self.unit_list[len(self.unit_list) - 1].unit_place[1] = base_position[1] + add_pos[0][1]
+                    self.add_unit_button(self.unit_list[len(self.unit_list) - 1].unit_place[0],
+                                         self.unit_list[len(self.unit_list) - 1].unit_place[1],
+                                         cell_size, self.name, len(self.unit_list) - 1)
         if len(self.units_behave_list) == 0:
             self.next_turn = True
 
-    def push_highlighted_cell(self, x, y, unit_x, unit_y, nickname, cell_size):
-        self.unit_info = UI.Text('', 100, 700)
+    def on_push_highlighted_cell(self, x, y, unit_x, unit_y, nickname, cell_size):
+        self.unit_info = UI.Text('', self.height * self.unit_info_y_coef, self.width * self.unit_info_x_coef)
         for k, i in enumerate(self.unit_list):
             if (i.unit_place[0] == unit_x + 1) and (i.unit_place[1] == unit_y + 1):
                 i.unit_place[0] = x + 1
                 i.unit_place[1] = y + 1
                 self.units_behave_list.remove(i)
                 i.participated_in_turn = True
-                self.unit_button(i.unit_place[0], i.unit_place[1], cell_size, nickname, k)
+                self.add_unit_button(i.unit_place[0], i.unit_place[1], cell_size, nickname, k)
         for i in range(len(self.button_list) - 1):
             if (self.button_list[i].x == unit_x + 1) and (self.button_list[i].y == unit_y + 1):
                 self.button_list.remove(self.button_list[i])
@@ -178,7 +179,7 @@ class Fraction:
         if len(self.units_behave_list) == 0:
             self.next_turn = True
 
-    def highlighted_cell(self, center_x, center_y, button_action, nickname, x, y, unit_x, unit_y, cell_size):
+    def create_highlighted_cell(self, center_x, center_y, button_action, nickname, x, y, unit_x, unit_y, cell_size):
         return UI.HighlightedCellButton(center_x,
                                         center_y,
                                         button_action,
@@ -187,11 +188,11 @@ class Fraction:
                                         x,
                                         y,
                                         unit_x,
-                                        unit_y, cell_size)
+                                        unit_y, cell_size, 'move')
 
-    def highlighted_attack_cell(self, center_x, center_y, button_action, nickname, x, y,
-                                unit_x, unit_y, cell_size, players_list):
-        return UI.HighlightedAttackCellButton(center_x,
+    def create_highlighted_attack_cell(self, center_x, center_y, button_action, nickname, x, y,
+                                unit_x, unit_y, cell_size):
+        return UI.HighlightedCellButton(center_x,
                                               center_y,
                                               button_action,
                                               '',
@@ -199,83 +200,45 @@ class Fraction:
                                               x,
                                               y,
                                               unit_x,
-                                              unit_y, cell_size, players_list)
+                                              unit_y, cell_size, 'attack')
 
-    def release_unit_button(self):
-        self.unit_info = UI.Text('', 100, 700)
+    def on_release_unit_button(self):
+        self.unit_info = UI.Text('', self.height * self.unit_info_y_coef, self.width * self.unit_info_x_coef)
         self.highlighted_cells_list = []
 
-    def push_unit_button(self, x, y, cell_size, nickname):
+    def on_push_unit_button(self, x, y, cell_size, nickname):
         for i in self.player_list:
             for j in i.button_list:
                 if j.pressed:
                     j.pressed = False
         for i in self.unit_list:
             if [x, y] == [i.unit_place[0], i.unit_place[1]]:
-                self.unit_info = UI.Text('жизни: {}, урон: {}, тип: {}'.format(i.hp, i.damage, i.type), 100, 700)
+                self.unit_info = UI.Text('жизни: {}, урон: {}, тип: {}'.format(i.hp, i.damage, i.type),
+                                         self.height * self.unit_info_y_coef, self.width * self.unit_info_x_coef)
                 unit_now = i
         if not unit_now.participated_in_turn:
             self.highlighted_cells_list = []
-            if y < self.field_size:
-                if self.field_info[x - 1][y] is None:
-                    self.highlighted_cells_list.append(self.highlighted_cell(count_coordinates_x(x, cell_size),
-                                                                             count_coordinates_y(y, cell_size) + cell_size,
-                                                                             self.push_highlighted_cell,
-                                                                             nickname, x - 1, y, x - 1, y - 1, cell_size))
-
-                else:
+            add_highlighted_cells = []
+            find = self.seek_for_empty_slot(x, y, add_highlighted_cells, True)
+            if find:
+                for i in add_highlighted_cells:
+                    self.highlighted_cells_list.append(self.create_highlighted_cell(count_coordinates_x(x + i[0], cell_size),
+                                                                                    count_coordinates_y(y + i[1], cell_size),
+                                                                                    self.on_push_highlighted_cell,
+                                                                                    nickname, x + i[0] - 1, y + i[1] - 1, x - 1, y - 1,
+                                                                                    cell_size))
+            add_highlighted_attack_cells = []
+            find_sth_to_attack = self.seek_for_empty_slot(x, y, add_highlighted_attack_cells, False)
+            if find_sth_to_attack:
+                for i in add_highlighted_attack_cells:
                     friendly_fire = False
-                    for i in self.unit_list:
-                        if (i.unit_place[0] == x) and (i.unit_place[1] == y + 1):
+                    for j in self.unit_list:
+                        if (j.unit_place[0] == x + i[0]) and (j.unit_place[1] == y + i[1]):
                             friendly_fire = True
                     if not friendly_fire:
-                        self.highlighted_cells_list.append(self.highlighted_attack_cell(count_coordinates_x(x, cell_size),
-                                                                                        count_coordinates_y(y, cell_size) + cell_size, self.hit_unit,
-                                                                                        nickname, x - 1, y, x - 1, y - 1, cell_size, self.player_list))
-            if x < self.field_size:
-                if self.field_info[x][y - 1] is None:
-                    self.highlighted_cells_list.append(self.highlighted_cell(count_coordinates_x(x, cell_size) + cell_size,
-                                                                             count_coordinates_y(y, cell_size), self.push_highlighted_cell,
-                                                                             nickname, x, y - 1, x - 1, y - 1, cell_size))
-                else:
-                    friendly_fire = False
-                    for i in self.unit_list:
-                        if (i.unit_place[0] == x + 1) and (i.unit_place[1] == y):
-                            friendly_fire = True
-                    if not friendly_fire:
-                        self.highlighted_cells_list.append(self.highlighted_attack_cell(count_coordinates_x(x, cell_size) + cell_size,
-                                                                                        count_coordinates_y(y, cell_size), self.hit_unit,
-                                                                                        nickname, x, y - 1, x - 1, y - 1, cell_size, self.player_list))
-            if x > 1:
-                if self.field_info[x - 2][y - 1] is None:
-                    self.highlighted_cells_list.append(self.highlighted_cell(count_coordinates_x(x, cell_size) - cell_size,
-                                                                             count_coordinates_y(y, cell_size), self.push_highlighted_cell,
-                                                                             nickname, x - 2, y - 1, x - 1, y - 1, cell_size))
-                else:
-                    friendly_fire = False
-                    for i in self.unit_list:
-                        if (i.unit_place[0] == x - 1) and (i.unit_place[1] == y):
-                            friendly_fire = True
-                    if not friendly_fire:
-                        self.highlighted_cells_list.append(self.highlighted_attack_cell(count_coordinates_x(x, cell_size) - cell_size,
-                                                                                        count_coordinates_y(y, cell_size), self.hit_unit,
-                                                                                        nickname, x - 2, y - 1, x - 1, y - 1, cell_size, self.player_list))
-            if y > 1:
-                if self.field_info[x - 1][y - 2] is None:
-                    self.highlighted_cells_list.append(self.highlighted_cell(count_coordinates_x(x, cell_size),
-                                                                             count_coordinates_y(y, cell_size) - cell_size,
-                                                                             self.push_highlighted_cell,
-                                                                             nickname, x - 1, y - 2, x - 1, y - 1, cell_size))
-                else:
-                    friendly_fire = False
-                    for i in self.unit_list:
-                        if (i.unit_place[0] == x) and (i.unit_place[1] == y - 1):
-                            friendly_fire = True
-                    if not friendly_fire:
-                        self.highlighted_cells_list.append(self.highlighted_attack_cell(count_coordinates_x(x, cell_size),
-                                                                                        count_coordinates_y(y, cell_size) - cell_size, self.hit_unit,
-                                                                                        nickname, x - 1, y - 2, x - 1, y - 1,
-                                                                                        cell_size, self.player_list))
+                        self.highlighted_cells_list.append(self.create_highlighted_attack_cell(count_coordinates_x(x + i[0], cell_size),
+                                                                                               count_coordinates_y(y + i[1], cell_size), self.hit_unit,
+                                                                                               nickname, x + i[0] - 1, y + i[1] - 1, x - 1, y - 1, cell_size))
 
     def count_units(self, text):
         print('{} имеют {} юнитов'.format(text, self.units.amount))
@@ -292,8 +255,8 @@ class Fraction:
 
 
 class CriminalFraction(Fraction):
-    def __init__(self, field_size):
-        super().__init__(field_size)
+    def __init__(self, field_size, width, height):
+        super().__init__(field_size, width, height)
         self.name_units.append(Bydlan)
         self.name_units.append(Bariga)
         self.name_units.append(Offnik)
@@ -345,8 +308,8 @@ class Zek(Units):
 
 ###############################################################NEXTFRACTION###############
 class MajorsFraction(Fraction):
-    def __init__(self, field_size):
-        super().__init__(field_size)
+    def __init__(self, field_size, width, height):
+        super().__init__(field_size, width, height)
         self.name_units.append(Podsosnik)
         self.name_units.append(Pokazushnik)
         self.name_units.append(Major)
@@ -398,8 +361,8 @@ class MainMajor(Units):
 
 ###############################################################NEXTFRACTION###############
 class PartyFraction(Fraction):
-    def __init__(self, field_size):
-        super().__init__(field_size)
+    def __init__(self, field_size, width, height):
+        super().__init__(field_size, width, height)
         self.name_units.append(Fan)
         self.name_units.append(Modnik)
         self.name_units.append(Strelocnik)
@@ -451,8 +414,8 @@ class Misha(Units):
 
 ###############################################################NEXTFRACTION###############
 class BotansFraction(Fraction):
-    def __init__(self, field_size):
-        super().__init__(field_size)
+    def __init__(self, field_size, width, height):
+        super().__init__(field_size, width, height)
         self.name_units.append(Dohodyaga)
         self.name_units.append(Otlychnik)
         self.name_units.append(Tupoydrug)
