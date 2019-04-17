@@ -98,7 +98,6 @@ class Game:
 
             mouse_pos = 0, 0
 
-            print(game_pole.arr)
             myboard.st_render(game_pole.arr, game_pole.points)  # отрисовываем изначальную версию поля
 
             running = True
