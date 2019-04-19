@@ -1,28 +1,30 @@
 import copy
 from collections import deque
 
-from Maze import Maze, Cell
+from Maze import Maze, Cell, State
 
 
-def get_next(cell, maze, next):
+def get_next(cell, maze):
     # записывает в next соседние с cell пустые клетки
+    next = []
     x = cell.x
     y = cell.y
-    if x + 1 < maze.height and maze.matrix[x + 1][y] == 'SPACE':
+    if x + 1 < maze.height and maze.matrix[x + 1][y] == State.space:
         next.append(Cell(x + 1, y))
-    if y + 1 < maze.width and maze.matrix[x][y + 1] == 'SPACE':
+    if y + 1 < maze.width and maze.matrix[x][y + 1] == State.space:
         next.append(Cell(x, y + 1))
-    if x - 1 >= 0 and maze.matrix[x - 1][y] == 'SPACE':
+    if x - 1 >= 0 and maze.matrix[x - 1][y] == State.space:
         next.append(Cell(x - 1, y))
-    if y - 1 >= 0 and maze.matrix[x][y - 1] == 'SPACE':
+    if y - 1 >= 0 and maze.matrix[x][y - 1] == State.space:
         next.append(Cell(x, y - 1))
+    return next
 
 
 def solution(maze: Maze):
     # решение лабиринта методом bfs
     maze1 = copy.deepcopy(maze)
     if maze1.entry == maze1.exit:
-        maze1.set(maze.entry, 'WAY')
+        maze1.set(maze.entry, State.way)
         return maze1
 
     parents = []
@@ -42,17 +44,16 @@ def solution(maze: Maze):
         curr = queue.pop()
         if curr == maze1.exit:
             prev = parents[curr.x][curr.y]
-            maze1.set(curr, 'WAY')
+            maze1.set(curr, State.way)
             while not prev == maze1.entry:
-                maze1.set(prev, 'WAY')
+                maze1.set(prev, State.way)
                 curr = prev
                 prev = parents[curr.x][curr.y]
-            maze1.set(maze1.entry, 'WAY')
+            maze1.set(maze1.entry, State.way)
             break
 
         else:
-            next = []
-            get_next(curr, maze1, next)
+            next = get_next(curr, maze1)
             for i in next:
                 if used[i.x][i.y] == 0 and parents[curr.x][curr.y] != i:
                     parents[i.x][i.y] = curr
@@ -60,8 +61,8 @@ def solution(maze: Maze):
                     used[i.x][i.y] = 1
             next.clear()
 
-    if not maze1.get(maze1.exit) == 'WAY':
-        print('NO SOLUTION')
+    if not maze1.get(maze1.exit) == State.way:
+        return False
     return maze1
 
 

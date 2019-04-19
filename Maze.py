@@ -1,5 +1,12 @@
 from termcolor import colored
 import random
+from enum import Enum
+
+
+class State(Enum):
+    wall = 1
+    space = 2
+    way = 3
 
 
 class Cell:
@@ -32,12 +39,11 @@ class Maze:
         # свободные клетки разделены стенами
         self.matrix = []
         for i in range(self.height):
-            self.matrix.append(['WALL'])
-            self.matrix[i] *= self.width
+            self.matrix.append([State.wall for i in range(self.width)])
         for i in range(1, self.height - 1):
             for j in range(1, self.width - 1):
                 if i % 2 == 1 & j % 2 == 1:
-                    self.matrix[i][j] = 'SPACE'
+                    self.matrix[i][j] = State.space
 
         self.entry = None
         self.exit = None
@@ -53,21 +59,21 @@ class Maze:
         for i in range(self.height):
             for j in range(self.width):
                 if self.entry == Cell(i, j) or self.exit == Cell(i, j):
-                    str += colored('/  ', 'green', 'on_green')
-                elif self.matrix[i][j] == 'SPACE':
+                    str += colored('/  ', 'yellow', 'on_green')
+                elif self.matrix[i][j] == State.space:
                     #str += '\033[93m.  \033[0m'
                     str += colored('.  ', 'yellow', 'on_yellow')
-                elif self.matrix[i][j] == 'WALL':
+                elif self.matrix[i][j] == State.wall:
                     #str += '\033[1m\033[94m#  \033[0m'
                     str += colored('#  ', 'blue', 'on_blue')  # attrs=['bold']
-                elif self.matrix[i][j] == 'WAY':
+                elif self.matrix[i][j] == State.way:
                     #str += '\033[91mS  \033[0m'
                     str += colored('S  ', 'red', 'on_red')
             str += '\n'
         return str
 
-    def set_doors(self, rand='rand'):
-        if rand == 'rand':
+    def set_doors(self, rand):
+        if rand is True:
             en = 2 * random.randint(1, (self.height - 3) // 2) + 1
 
             ex = 2 * random.randint(1, (self.height - 3) // 2) + 1
@@ -76,8 +82,8 @@ class Maze:
             ex = self.height - 2
         self.entry = Cell(en, 0)
         self.exit = Cell(ex, self.width - 1)
-        self.set(self.entry, 'SPACE')
-        self.set(self.exit, 'SPACE')
+        self.set(self.entry, State.space)
+        self.set(self.exit, State.space)
 
     def find_doors(self):
         #  в качестве дверей найдёт ближайшие к углам пустые клетки во внешней стене лабиринта
@@ -86,16 +92,14 @@ class Maze:
         min_dist = self.width + self.height + 10
         max_dist = 0
         while itright < self.width:
-            if self.matrix[0][itright] == 'SPACE':
-                print('right iter found space on top')
+            if self.matrix[0][itright] == State.space:
                 if itright <= min_dist:
                     min_dist = itright
                     self.entry = Cell(0, itright)
                 if itright > max_dist:
                     max_dist = itright
                     self.exit = Cell(0, itright)
-            if self.matrix[self.height-1][itright] == 'SPACE':
-                print('right iter found space on bot')
+            if self.matrix[self.height-1][itright] == State.space:
                 if itright + self.height - 1 < min_dist:
                     min_dist = itright + self.height - 1
                     self.entry = Cell(self.height - 1, itright)
@@ -104,16 +108,14 @@ class Maze:
                     self.exit = Cell(self.height - 1, itright)
             itright += 1
         while itdown < self.height:
-            if self.matrix[itdown][0] == 'SPACE':
-                print('down iter found space on left')
+            if self.matrix[itdown][0] == State.space:
                 if itdown < min_dist:
                     min_dist = itdown
                     self.entry = Cell(itdown, 0)
                 if itdown >= max_dist:
                     max_dist = itdown
                     self.exit = Cell(itdown, 0)
-            if self.matrix[itdown][self.width-1] == 'SPACE':
-                print('down iter found space on right')
+            if self.matrix[itdown][self.width-1] == State.space:
                 if itdown + self.width - 1 <= min_dist:
                     min_dist = itdown + self.width - 1
                     self.entry = Cell(itdown, self.width - 1)
@@ -121,22 +123,19 @@ class Maze:
                     max_dist = itdown + self.width - 1
                     self.exit = Cell(itdown, self.width - 1)
             itdown += 1
-        print(self.entry.x, self.entry.y)
-        print(self.exit.x, self.exit.y)
         if self.entry is None:
-            raise SyntaxError
+            raise ValueError('Двери не найдены')
 
     def save(self, file, type='w'):
-        f = open(file, type)
-        if type == 'a':
-            f.write('\n')
-        for i in range(self.height):
-            for j in range(self.width):
-                if self.matrix[i][j] == 'SPACE':
-                    f.write('.  ')
-                if self.matrix[i][j] == 'WALL':
-                    f.write('#  ')
-                if self.matrix[i][j] == 'WAY':
-                    f.write('S  ')
-            f.write('\n')
-        f.close()
+        with open(file, type) as f:
+            if type == 'a':
+                f.write('\n')
+            for i in range(self.height):
+                for j in range(self.width):
+                    if self.matrix[i][j] == State.space:
+                        f.write('.  ')
+                    if self.matrix[i][j] == State.wall:
+                        f.write('#  ')
+                    if self.matrix[i][j] == State.way:
+                        f.write('S  ')
+                f.write('\n')
