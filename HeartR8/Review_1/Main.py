@@ -10,9 +10,12 @@ def main():
     while not entered:
         try:
             number_of_players = int(input())
-            entered = True
+            if number_of_players > 1:
+                entered = True
+            else:
+                print("There can be only 2 or more players in the game")
         except ValueError:
-            print("Enter numbers, not letters")
+            print("Please enter number of players correctly")
             entered = False
 
     player_list = [None] * number_of_players
