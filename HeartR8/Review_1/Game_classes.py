@@ -213,58 +213,75 @@ class Fraction:
         self.unit_info = UI.Text('', self.height * self.unit_info_y_coef, self.width * self.unit_info_x_coef)
         self.highlighted_cells_list = []
 
-    def on_push_unit_button(self, x, y, cell_size, nickname):
+    def depress_buttons(self):
         for i in self.player_list:
             for j in i.button_list:
                 if j.pressed:
                     j.pressed = False
+
+    def find_unit(self, x, y):
+        unit_now = None
         for i in self.unit_list:
             if [x, y] == [i.unit_place[0], i.unit_place[1]]:
                 self.unit_info = UI.Text('жизни: {}, урон: {}, тип: {}'.format(i.hp, i.damage, i.type),
                                          self.height * self.unit_info_y_coef, self.width * self.unit_info_x_coef)
                 unit_now = i
+        return unit_now
+
+    def create_highlighted_cell_button(self, x, y, i, function_to_do, cell_size, nickname, action_type, delta=0):
+        return UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
+                                        count_coordinates_y(y + i[1], cell_size),
+                                        function_to_do, '',
+                                        nickname, x + i[0] - delta, y + i[1] - delta,
+                                        x - 1, y - 1,
+                                        cell_size, action_type)
+
+    def on_move(self, add_highlighted_cells, x, y, cell_size, nickname):
+        for i in add_highlighted_cells:
+            self.highlighted_cells_list.append(self.create_highlighted_cell_button(x, y, i,
+                                                                                   self.on_push_highlighted_cell,
+                                                                                   cell_size, nickname, 'move', 1))
+
+    def on_attack(self, add_highlighted_attack_cells, x, y, cell_size, nickname):
+        for i in add_highlighted_attack_cells:
+            friendly_fire = False
+            base_attack = False
+
+            for j in self.unit_list:
+                if (j.unit_place[0] == x + i[0]) and (j.unit_place[1] == y + i[1]):
+                    friendly_fire = True
+
+            for j in self.player_list:
+                if (j.base.place[0] == x + i[0]) and (j.base.place[1] == y + i[1]):
+                    base_attack = True
+
+            if (not friendly_fire) and (not base_attack):
+                self.highlighted_cells_list.append(self.create_highlighted_cell_button(x, y, i,
+                                                                                       self.hit_unit,
+                                                                                       cell_size, nickname, 'attack', 1))
+
+            if base_attack and (not (self.base.place[0] == x + i[0] and (self.base.place[1] == y + i[1]))):
+                self.highlighted_cells_list.append(self.create_highlighted_cell_button(x, y, i,
+                                                                                       self.hit_base,
+                                                                                       cell_size, nickname,
+                                                                                       'attack_base'))
+
+    def on_push_unit_button(self, x, y, cell_size, nickname):
+        self.depress_buttons()
+
+        unit_now = self.find_unit(x, y)
+
         if not unit_now.participated_in_turn:
             self.highlighted_cells_list = []
             add_highlighted_cells = []
             find = self.seek_for_empty_slot(x, y, add_highlighted_cells, True)
             if find:
-                for i in add_highlighted_cells:
-                    self.highlighted_cells_list.append(UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
-                                                                                count_coordinates_y(y + i[1], cell_size),
-                                                                                self.on_push_highlighted_cell, '',
-                                                                                nickname, x + i[0] - 1, y + i[1] - 1,
-                                                                                x - 1, y - 1,
-                                                                                cell_size, 'move'))
+                self.on_move(add_highlighted_cells, x, y, cell_size, nickname)
+
             add_highlighted_attack_cells = []
             find_sth_to_attack = self.seek_for_empty_slot(x, y, add_highlighted_attack_cells, False)
             if find_sth_to_attack:
-                for i in add_highlighted_attack_cells:
-                    friendly_fire = False
-                    base_attack = False
-
-                    for j in self.unit_list:
-                        if (j.unit_place[0] == x + i[0]) and (j.unit_place[1] == y + i[1]):
-                            friendly_fire = True
-
-                    for j in self.player_list:
-                        if (j.base.place[0] == x + i[0]) and (j.base.place[1] == y + i[1]):
-                            base_attack = True
-                    if (not friendly_fire) and (not base_attack):
-                        self.highlighted_cells_list.append(
-                            UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
-                                                     count_coordinates_y(y + i[1], cell_size),
-                                                     self.hit_unit, '',
-                                                     nickname, x + i[0] - 1, y + i[1] - 1,
-                                                     x - 1, y - 1,
-                                                     cell_size, 'attack'))
-                    if base_attack and (not (self.base.place[0] == x + i[0] and (self.base.place[1] == y + i[1]))):
-                        self.highlighted_cells_list.append(
-                            UI.HighlightedCellButton(count_coordinates_x(x + i[0], cell_size),
-                                                     count_coordinates_y(y + i[1], cell_size),
-                                                     self.hit_base, '',
-                                                     nickname, x + i[0], y + i[1],
-                                                     x - 1, y - 1,
-                                                     cell_size, 'attack_base'))
+                self.on_attack(add_highlighted_attack_cells, x, y, cell_size, nickname)
 
     def count_units(self, text):
         print('{} имеют {} юнитов'.format(text, self.units.amount))
