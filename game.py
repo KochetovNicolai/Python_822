@@ -38,6 +38,8 @@ class Board:
             self.arr[rind][cind] = '0'
             self.empty_x = cind
             self.empty_y = rind
+        elif (abs(self.empty_y - rind) + abs(self.empty_x - cind)) == 0:    # если игрок нажимает на пустую ячейку,
+            pass                                                            # очки не снимаются
         elif (self.points - self.extra_cost) >= self.min_points:            # проверка, хватает ли у игрока очков
             self.update_points(False)                                       # далее аналогично предыдущему пункту
             myboard.render(self.arr[rind][cind], rind, cind, self.empty_y, self.empty_x, self.points)
