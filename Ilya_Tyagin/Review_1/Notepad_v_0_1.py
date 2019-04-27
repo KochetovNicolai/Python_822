@@ -202,16 +202,16 @@ def re_tab(s):
         return "".join(l)
 
 def main():
-    try:
+    if len(sys.argv) == 2:
         name = sys.argv[1]
-        if len(sys.argv) != 2:
-            print('ERROR. Please use one argument to launch editor.')
-            return
-        assert open(name, "a")
-    except:
-        sys.stderr.write(__doc__)
+        if os.path.exists(sys.argv[1]) and os.path.isfile(sys.argv[1]):
+            open(name, "a+")
+        else:
+            open(name, "w+")
+        EditDisplay(name).main()
+    else:
+        print('ERROR. Please use one argument to launch editor.\nIt should be a filename OR a path to file to open.')
         return
-    EditDisplay(name).main()
 
 if __name__=="__main__":
     main()
