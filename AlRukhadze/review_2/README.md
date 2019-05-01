@@ -1,27 +1,17 @@
 **Before running:**
 
-`sudo apt install python3-venv`
+`pip3 install flask`
 
 `mkrid first_pancake_review2`
 
 `cd first_pancake_review2`
 
-`python3 -m venv venv`
-
-`source venv/bin/activate`
-
-`pip install Flask`
-
+`(download first_pancake.py to 'first_pancake_review2')`
 
 
 **Running:**
 
-`(download the_first_pancake.py to 'first_pancake_review2')`
-
-`export FLASK_APP=the_first_pancake`
-
-`flask run`
-
+`python3 first_pancake.py`
 
 
 **Okay but what is it?**
