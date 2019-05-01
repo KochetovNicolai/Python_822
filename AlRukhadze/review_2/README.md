@@ -16,7 +16,7 @@
 
 **Running:**
 
-`(download the_first_pancake_is_always_lumpy.py to 'first_pancake_review2')`
+`(download the_first_pancake.py to 'first_pancake_review2')`
 
 `export FLASK_APP=the_first_pancake`
 
