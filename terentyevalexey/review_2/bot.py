@@ -73,8 +73,9 @@ def ask(bot: Bot, update: Update):
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(unescape(answer), callback_data=(
-            ('correct' if answer == right_answer else 'incorrect') + unescape(
-                right_answer))),
+                (
+                    'correct' if answer == right_answer else 'incorrect') + unescape(
+            right_answer))),
          ] for answer in answers
     ])
 
@@ -86,17 +87,31 @@ def ask(bot: Bot, update: Update):
 
 def correct_answer(bot: Bot, update: Update):
     query = update.callback_query
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton('Easy', callback_data='easy'),
+         InlineKeyboardButton('Medium', callback_data='medium'),
+         InlineKeyboardButton('Hard', callback_data='hard')],
+    ])
     query.edit_message_text(
         text=unescape(query.message.text + '\nIndeed!' +
-                      f'\n{query.data[7::]} - is the right answer!'),
+                      f'\n{query.data[7::]} - is the right answer!' +
+                      '\nDo you want a next question?'),
+        reply_markup=keyboard,
     )
 
 
 def incorrect_answer(bot: Bot, update: Update):
     query = update.callback_query
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton('Easy', callback_data='easy'),
+         InlineKeyboardButton('Medium', callback_data='medium'),
+         InlineKeyboardButton('Hard', callback_data='hard')],
+    ])
     query.edit_message_text(
         text=unescape(query.message.text + '\nNo, you are wrong!' +
-                      f'\n{query.data[9::]} - is the correct answer.'),
+                      f'\n{query.data[9::]} - is the correct answer.' +
+                      '\nMaybe, the next question will be easier?'),
+        reply_markup=keyboard,
     )
 
 
@@ -126,8 +141,9 @@ def question_create(bot: Bot, update: Update):
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(unescape(answer), callback_data=(
-            ('correct' if answer == right_answer else 'incorrect') + unescape(
-                right_answer))),
+                (
+                    'correct' if answer == right_answer else 'incorrect') + unescape(
+            right_answer))),
          ] for answer in answers
     ])
 
