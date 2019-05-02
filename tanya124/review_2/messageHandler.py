@@ -1,9 +1,24 @@
 import vkapi
 import requests
+from settings import key_appid
 
 def get_weather_today(city):
-    url = 'http://api.openweathermap.org/data/2.5/weather?appid=0c42f7f6b53b244c78a418f4f181282a&q=' + city
-    data = requests.get(url, params={'lang': 'ru'}).json()
+    url = 'http://api.openweathermap.org/data/2.5/weather'
+
+    try:
+        data = requests.get(url, params={'lang': 'ru', 'appid': key_appid, 'q': city}).json()
+    except ValueError:
+        return
+
+    try:
+        data['cod']
+        data['weather']
+        data['weather'][0]['description']
+        data['main']
+        data['main']['temp']
+
+    except KeyError:
+        return
 
     result = ''
 
@@ -21,8 +36,25 @@ def get_weather_not_today(body):
     city = body.split()[0][0:-1]
     day = body.split()[1].split('.')[0]
     month = body.split()[1].split('.')[1]
-    url = 'http://api.openweathermap.org/data/2.5/forecast?appid=0c42f7f6b53b244c78a418f4f181282a&q=' + city
-    data = requests.get(url, params={'lang': 'ru'}).json()
+    url = 'http://api.openweathermap.org/data/2.5/forecast'
+
+    try:
+        data = requests.get(url, params={'lang': 'ru', 'appid': key_appid, 'q': city}).json()
+    except ValueError:
+        return
+
+    try:
+        data['cod']
+        data['list']
+        for i in data['list']:
+            i['dt_txt']
+            i['weather']
+            i['weather'][0]['description']
+            i['main']
+            i['main']['temp']
+    except KeyError:
+        return
+
     result = ''
 
     for i in data['list']:
@@ -40,6 +72,7 @@ def get_weather_not_today(body):
 
         else:
             pass
+
 
     if data['cod'] == '404':
         return 'Город, не найден.'
