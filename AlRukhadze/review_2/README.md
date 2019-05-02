@@ -11,11 +11,7 @@
 
 **Running:**
 
-`source venv/bin/activate`
-
-`export FLASK_APP=first_pancake.py`
-
-`flask run`
+`python first_pancake.py`
 
 
 **Okay but what is it?**
