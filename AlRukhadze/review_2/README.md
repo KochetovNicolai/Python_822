@@ -6,12 +6,16 @@
 
 `cd first_pancake_review2`
 
-`(download first_pancake.py to 'first_pancake_review2')`
+`(download directory review_2)`
 
 
 **Running:**
 
-`python3 first_pancake.py`
+`source venv/bin/activate`
+
+`export FLASK_APP=first_pancake.py`
+
+`flask run`
 
 
 **Okay but what is it?**
