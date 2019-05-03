@@ -75,7 +75,7 @@ def get_weather_not_today(body):
 
 
     if data['cod'] == '404':
-        return 'Город, не найден.'
+        return 'Город не найден.'
     elif result == '':
         return 'Данные введены некорректно. Формат ввода: город, DD.MM. Прогноз погоды доступен только на 5 дней вперёд.'
     else:
