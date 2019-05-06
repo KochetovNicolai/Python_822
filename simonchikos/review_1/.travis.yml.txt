@@ -1,0 +1,19 @@
+sudo: required
+before_install:
+    - sudo apt-get install cmake
+    - sudo apt-get install python3-tk
+    - sudo pip3 install pillow
+language: cpp
+
+compiler: gcc
+
+script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make
+
+notifications:
+    email:
+        on_success: always
+        on_failure: always
