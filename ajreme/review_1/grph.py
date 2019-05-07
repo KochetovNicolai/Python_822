@@ -1,9 +1,9 @@
-import argparse
-import json
+from json import load
 from mkwrld import CreateWorld
+from argparse import ArgumentParser
 
 
-parser = argparse.ArgumentParser(description='World creator')
+parser = ArgumentParser(description='World creator')
 
 parser.add_argument('--example', nargs='?', type=str,
                     default=None, help='# of example to show.\
@@ -25,7 +25,7 @@ parser.add_argument('--file_name', nargs='?', type=str,
 args = dict(parser.parse_args()._get_kwargs())
 if args['example'] is not None:
     with open('examples/example' + str(args['example']) + '.json', 'r') as ex:
-        CreateWorld(**json.load(ex))
+        CreateWorld(**load(ex))
 elif args['N'] is not None and args['M'] is not None:
     args = [*filter(lambda x: x[1] is not None, args.items())]
     CreateWorld(**dict(args))

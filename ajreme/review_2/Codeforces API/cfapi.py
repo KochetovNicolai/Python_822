@@ -3,6 +3,7 @@ from requests import get
 from pathlib import Path
 from hashlib import sha512
 from tabulate import tabulate
+from datetime import datetime
 from random import SystemRandom
 from webbrowser import open_new_tab
 from string import ascii_lowercase, digits
@@ -917,22 +918,53 @@ class ext_CodeforcesAPI(CodeforcesAPI):
         '''
         return [chr(ord('A') + i) for i in range(num)]
 
-    def get_lastVerdict(self, handle=None):
+    def get_verdicts(self, handle, from_sub=1, count=10, mode='fancy_grid'):
         '''
-        Get the latest verdict of user.
-        If handle is None, your handle in __init__ used.
+        Get the table of latest verdicts of user.
         '''
-        if isinstance(handle, str):
-            self.last_verdict = self.user_status(handle=handle,
-                                                 from_sub=1,
-                                                 count=1)
-        elif self._handle is not None:
-            self.last_verdict = self.user_status(handle=self._handle,
-                                                 from_sub=1,
-                                                 count=1)
+        listTypeChecker([handle, from_sub, count, mode],
+                        [str, int, int, str],
+                        [False, False, False, False])
+        self.last_verdict = self.user_status(handle=handle,
+                                                from_sub=from_sub,
+                                                count=count)
+
+        if len(self.last_verdict):
+            if self.language == 'en':
+                cols = ['#', 'When', 'Who', 'Problem',
+                        'Lang', 'Verdict', 'Time', 'Memory']
+            else:
+                cols = ['#', 'Когда', 'Кто', 'Задача',
+                        'Язык', 'Вердикт', 'Время', 'Память']
+            rows = []
+            for tmp in self.last_verdict:
+                rows.append([tmp.id,
+                             datetime.fromtimestamp(
+                                 tmp.creationTimeSeconds
+                             ).strftime("%d.%m.%Y %H:%M"),
+                             handle,
+                             tmp.problem.name,
+                             tmp.programmingLanguage,
+                             tmp.verdict,
+                             tmp.timeConsumedMillis,
+                             int(tmp.memoryConsumedBytes / 1024 + 0.5)
+                        ])
+            return tabulate(rows, cols, tablefmt=mode)
         else:
-            raise TypeError('Handle is not provided')
-        return self.last_verdict[0] if len(self.last_verdict) else None
+            return ''
+
+    def get_lastVerdict(self, handle=None, mode='fancy_grid'):
+        '''
+        Returns result of the latest user submission and return
+        table by tabulate. You can choose mode for tabulate.
+        If handle is None, provided handle used.
+        '''
+        if handle is None:
+            handle = self._handle
+        return self.get_verdicts(handle=handle,
+                                 from_sub=1,
+                                 count=1,
+                                 mode=mode)
 
     def get_page(self, link, **params):
         '''
