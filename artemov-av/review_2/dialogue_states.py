@@ -51,14 +51,19 @@ class FindFilmState(DialogueState):
     @staticmethod
     def handle_replica(replica, user_id):
         api_answer = ImdbApiHandler.find_film_by_name(replica)
+        if api_answer.get('Response') is None:
+            return Response(RootState, 'Failed to get info from IMDB')
+
         if api_answer['Response'] == 'False':
             return Response(RootState, 'Film was not found :c')
+        elif api_answer.get('Title') is None:
+            return Response(RootState, 'We lack information about this film')
         else:
             response = 'Title: ' + api_answer['Title'] + '\n'
-            response += 'Year: ' + api_answer['Year'] + '\n'
-            response += 'Released: ' + api_answer['Released'] + '\n'
-            response += 'Genre: ' + api_answer['Genre'] + '\n'
-            response += 'Director: ' + api_answer['Director'] + '\n'
+            response += 'Year: ' + api_answer['Year'] + '\n' if api_answer.get('Year') is not None else ''
+            response += 'Released: ' + api_answer['Released'] + '\n' if api_answer.get('Year') is not None else ''
+            response += 'Genre: ' + api_answer['Genre'] + '\n' if api_answer.get('Year') is not None else ''
+            response += 'Director: ' + api_answer['Director'] + '\n' if api_answer.get('Year') is not None else ''
             return Response(RootState, response)
 
 
@@ -66,8 +71,13 @@ class AddToWatchedListState(DialogueState):
     @staticmethod
     def handle_replica(replica, user_id):
         api_answer = ImdbApiHandler.find_film_by_name(replica)
+        if api_answer.get('Response') is None:
+            return Response(AddToWatchedListState, 'Failed to get info from IMDB')
+
         if api_answer['Response'] == 'False':
             return Response(AddToWatchedListState, 'Film was not found :c')
+        elif api_answer.get('Title') is None or api_answer.get('Year') is None:
+            return Response(AddToWatchedListState, 'We lack information about this film')
         else:
             BotDatabase().add_to_watched(user_id, api_answer['Title'])
             return Response(RootState, 'Added film in your watch list:\n' +
@@ -78,8 +88,15 @@ class AddToWishListState(DialogueState):
     @staticmethod
     def handle_replica(replica, user_id):
         api_answer = ImdbApiHandler.find_film_by_name(replica)
+        if api_answer.get('Response') is None:
+            return Response(AddToWishListState, 'Failed to get info from IMDB')
+        if api_answer.get('Title') is None or api_answer.get('Year') is None:
+            return Response(AddToWishListState, 'We lack information about this film')
+
         if api_answer['Response'] == 'False':
             return Response(AddToWishListState, 'Film was not found :c')
+        elif api_answer.get('Title') is None or api_answer.get('Year') is None:
+            return Response(AddToWishListState, 'We lack information about this film')
         else:
             BotDatabase().add_to_wished(user_id, api_answer['Title'])
             return Response(RootState, 'Added film in your wish list:\n' +

@@ -1,8 +1,10 @@
 from telebot import TeleBot
 from bot_logic import BotLogic
+import configparser
 
-token = "854886337:AAHIgbDJBSKgIWK_9TvjCDC9ScvdBxu0650"
-bot = TeleBot(token)
+config = configparser.ConfigParser()
+config.read('config.ini')
+bot = TeleBot(config['telegram']['token'])
 
 
 @bot.message_handler(commands=['start'])

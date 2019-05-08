@@ -1,19 +1,27 @@
 import json
 import requests
+import configparser
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class ImdbApiHandler:
-    url_template = 'http://www.omdbapi.com/?apikey={0}&'
-    api_key = '1112cec3'
+    url = 'http://www.omdbapi.com/?'
+    api_key = config['imdb_api']['key']
 
     @staticmethod
     def find_film_by_name(name):
-        url = ImdbApiHandler.url_template+'t={1}'
-        response = requests.get(url.format(ImdbApiHandler.api_key, name))
-        return response.json()
+        params = {'apikey':ImdbApiHandler.api_key, 't': name}
+        response = requests.get(ImdbApiHandler.url, params=params)
+        if str(response.status_code)[0] != '2':
+            return {'Response':'False'}
+        try:
+            return response.json()
+        except Exception:
+            return {'Response':'False'}
 
     @staticmethod
     def find_films_by_name(name):
-        url = ImdbApiHandler.url_template+'t={1}'
-        response = requests.get(url.format(ImdbApiHandler.api_key, name))
+        params = {'apikey':ImdbApiHandler.api_key, 's': name}
+        response = requests.get(ImdbApiHandler.url, params=params)
         return response.json()
