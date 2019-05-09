@@ -13,7 +13,7 @@ def index():							# и соответствующий ему обработчи
 
 @app.route('/wrong_add')
 def wrong_add():
-	return render_template('wrong_add')
+	return render_template('wrong_add.html')
 
 @app.route('/add_deadline',methods=['POST'])
 def add_deadline():
