@@ -147,8 +147,11 @@ def question_create(bot: Bot, update: Update):
                 'difficulty': difficulty}
     )
 
-    if question_req.status_code in range(200, 300):
-        question_req = question_req.json()
+    if question_req.status_code not in range(200, 300):
+        return
+    question_req = question_req.json()
+    if 'results' not in question_req:
+        return
     question_req = question_req['results'][0]
     if 'incorrect_answers' not in question_req or \
             'correct_answer' not in question_req or \
