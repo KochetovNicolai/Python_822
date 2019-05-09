@@ -6,7 +6,7 @@ class Plot:
     """Этот класс ответственный за отрисовку графиков"""
 
     def __init__(self):
-        pass
+        self.duration = 36  # Количество месяцев
 
     def table_to_plot(self, table, company='Undefined', name_='Undefined', ):
         """Из pandas.DataFrame делает график и сохраняет его в data"""
@@ -35,8 +35,8 @@ class Plot:
         plt.grid(True)
 
         plt.plot(
-            table[:36]['timestamp'].iloc[::-1],
-            table[:36]['mean'].iloc[::-1],
+            table[:self.duration]['timestamp'].iloc[::-1],
+            table[:self.duration]['mean'].iloc[::-1],
             color='teal',
             alpha=0.9,
             linewidth=8
@@ -78,8 +78,8 @@ class Plot:
 
         for i in range(len(tables)):
             plt.plot(
-                tables[i][:36]['timestamp'].iloc[::-1],
-                tables[i][:36]['mean'].iloc[::-1],
+                tables[i][:self.duration]['timestamp'].iloc[::-1],
+                tables[i][:self.duration]['mean'].iloc[::-1],
                 color=colours[i],
                 alpha=0.9,
                 linewidth=5
