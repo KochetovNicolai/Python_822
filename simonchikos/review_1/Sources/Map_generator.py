@@ -6,6 +6,7 @@ from queue import Queue
 import tkinter as tk
 from PIL import Image, ImageTk
 import sys
+import os
 
 # Окно вывода изображения на экран
 class ExampleApp(tk.Tk):
@@ -73,6 +74,9 @@ class ExampleApp(tk.Tk):
 
         #master = looped root, к которому мы "привязались"
 
+        dirname = os.path.dirname(__file__)
+        filename = os.path.join(dirname, 'Textures/Example.png').replace("\\", "/")
+
         # Указание наименований текстур, импортируемых в вывод *позиция имеет значение!!!*
         self.names = ['Water_deep.png', 'Water_not_deep.png', 'Plains.png', 'Forests.png', 'Mountains.png', 'Snowy_mountains.png']
         self.master = master
@@ -137,7 +141,7 @@ class ExampleApp(tk.Tk):
         self.message_button.grid(row=0, column=0, sticky="nesw")
         self.message_button.bind("<Button-1>", self._map_generate)
 
-        self.smallmap = Image.open("Example.png")
+        self.smallmap = Image.open(filename)
         self.smallmap = self.smallmap.resize((350, 350), Image.ANTIALIAS)
         self.smallmap = ImageTk.PhotoImage(self.smallmap)
 
@@ -160,7 +164,7 @@ class ExampleApp(tk.Tk):
 
         # Создание массива текстур, для ускорения работы вывода изображений
         for name in self.names:
-            self.im = Image.open(name)
+            self.im = Image.open(os.path.join(dirname, "Textures", name).replace("\\", "/"))
             self.tk_im.append(ImageTk.PhotoImage(self.im))
             self.images.append(self.im)
 
