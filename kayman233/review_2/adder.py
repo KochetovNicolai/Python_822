@@ -65,7 +65,7 @@ class Adder:
 
         owp_response = requests.get(owp_url_base, params=owp_params)
 
-        if re.match(r'2\d{2}', str(owp_response.status_code)) is None:
+        if not owp_response.ok:
             raise ApiException
 
         owp_json_data = owp_response.json()
@@ -87,7 +87,7 @@ class Adder:
 
         meta_weather_response = requests.get(meta_weather_url)
 
-        if re.match(r'2\d{2}', str(meta_weather_response.status_code)) is None:
+        if not meta_weather_response.ok:
             raise ApiException
 
         try:
