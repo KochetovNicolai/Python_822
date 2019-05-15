@@ -37,7 +37,7 @@ class Forecaster:
     def get_time_difference(self, first, second):
         if first is None or second is None:
             return 0
-        first_time = datetime.datetime.strptime(first[:5], self.time_format)
+        first_time = datetime.datetime.strptime(first[:5], self.time_format)  # 5 symbols to not consider nanoseconds
         second_time = datetime.datetime.strptime(second[:5], self.time_format)
         diff1 = first_time - second_time
         diff2 = second_time - first_time
@@ -126,7 +126,7 @@ class Forecaster:
             for row in rows:
                 forecast_temp, api, date, forecast_time = row
 
-                if forecast_time is not None and '12:00:00' <= forecast_time <= '18:00:00':
+                if self.check_time(forecast_time):
                     cnt += 1
                     owp_avg_temp = (owp_avg_temp * (cnt - 1) + forecast_temp) / cnt
                 else:
@@ -140,3 +140,15 @@ class Forecaster:
             day = self.day_increase(day, 1)
 
         return self.forecasts_list
+
+    def check_time(self, forecast_time):
+        if forecast_time is None:
+            return False
+        time = datetime.datetime.strptime(forecast_time[:5], self.time_format)  # 5 symbols to not consider nanoseconds
+        start_time = datetime.datetime.strptime('12:00', self.time_format)
+        end_time = datetime.datetime.strptime('18:00', self.time_format)
+
+        if start_time <= time <= end_time:
+            return True
+
+        return False
