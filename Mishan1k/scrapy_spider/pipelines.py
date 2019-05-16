@@ -31,12 +31,6 @@ class ScrapySpiderPipeline(object):
             session.add(quotedb)
             session.commit()
 
-            for instance in session.query(QuoteDB).order_by(QuoteDB.id):
-                print instance.quote, instance.author
-                
-            for name in session.query(QuoteDB.quote).filter_by(author='Albert Einstein'):
-                print quote
-
         except:
             session.rollback()
             raise
