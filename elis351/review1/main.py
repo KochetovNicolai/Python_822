@@ -3,65 +3,147 @@ import random
 
 
 class Character:
-    hunger = 50
-    health = 50
-    mood = 50
-    energy = 50
+    def __init__(self):
+        # Задание интерфейса
+        self.root = tkinter.Tk()
+        self.root.title("Тамагочи")
+        self.root.geometry("800x600")
 
-    sleepNow = False
-    playNow = False
+        self.hunger = 50
+        self.health = 50
+        self.mood = 50
+        self.energy = 50
 
-    play_img = None
+        self.sleepNow = False
+        self.playNow = False
+
+        self.play_img = None
+
+        # Картинки
+        self.hungry = tkinter.PhotoImage(file="images/want_eat.png")
+        self.normal = tkinter.PhotoImage(file="images/normal.png")
+        self.dead = tkinter.PhotoImage(file="images/error.png")
+        self.happy = tkinter.PhotoImage(file="images/happy.png")
+        self.unhappy = tkinter.PhotoImage(file="images/unhappy.png")
+        self.sleeping = tkinter.PhotoImage(file="images/sleep.png")
+        self.want_sleep = tkinter.PhotoImage(file="images/want_sleep.png")
+        self.fat = tkinter.PhotoImage(file="images/fat.png")
+        self.cry = tkinter.PhotoImage(file="images/cry.png")
+        self.rock = tkinter.PhotoImage(file="images/rock.png")
+        self.guitar = tkinter.PhotoImage(file="images/guitar.png")
+        self.music = tkinter.PhotoImage(file="images/music.png")
+        self.war = tkinter.PhotoImage(file="images/war.png")
+
+        self.playing = [self.rock, self.guitar, self.music, self.war]
+
+        # Картинка хомяка
+        self.pet = tkinter.Label(self.root, image=self.normal)
+
+        # Текстовые поля
+        self.startLabel = tkinter.Label(self.root, text="Чтобы начать игру, нажмите Enter", font=('Helvetica', 14))
+        self.mainLabel = tkinter.Label(self.root, text="Заботьтесь о Сене, не дайте ему погибнуть!", font=('Helvetica', 14))
+        self.hungerLabel = tkinter.Label(self.root, text="Еда: " + str(self.hunger), font=('Helvetica', 10))
+        self.healthLabel = tkinter.Label(self.root, text="Здоровье: " + str(self.health), font=('Helvetica', 10))
+        self.moodLabel = tkinter.Label(self.root, text="Настроение: " + str(self.mood), font=('Helvetica', 10))
+        self.energyLabel = tkinter.Label(self.root, text="Энергия: " + str(self.energy), font=('Helvetica', 10))
+
+        # Кнопки
+        self.btnFeed = tkinter.Button(self.root, text="Покормить", width=10, height=1,
+                                      font=('Helvetica', 10), command=self.feed)
+        self.btnTreat = tkinter.Button(self.root, text="Лечить", width=10, height=1,
+                                       font=('Helvetica', 10), command=self.treat)
+        self.btnMood = tkinter.Button(self.root, text="Играть", width=10, height=1,
+                                      font=('Helvetica', 10), command=self.play)
+        self.btnSleep = tkinter.Button(self.root, text="Спать", width=10, height=1,
+                                       font=('Helvetica', 10), command=self.sleep)
+        self.btnWakeUp = tkinter.Button(self.root, text="Проснуться", width=10, height=1,
+                                        font=('Helvetica', 10), command=self.wake_up)
+        self.btnStopPlay = tkinter.Button(self.root, text="Прекратить", width=10, height=1,
+                                          font=('Helvetica', 10), command=self.stop_play)
+
+        # Закрепление на экране
+        self.startLabel.place(x=240, y=570)
+        self.hungerLabel.place(x=5, y=5)
+        self.healthLabel.place(x=5, y=35)
+        self.moodLabel.place(x=5, y=65)
+        self.energyLabel.place(x=5, y=95)
+        self.pet.place(x=135, y=30)
+        self.btnFeed.place(x=700, y=5)
+        self.btnTreat.place(x=700, y=35)
+        self.btnMood.place(x=700, y=65)
+        self.btnSleep.place(x=700, y=95)
+
+    # Запуск
+    def start_game(self):
+        self.root.bind('<Return>', self.start)
+        self.root.resizable(width=False, height=False)
+        self.root.mainloop()
+
+    # Функция начала игры
+    def start(self):
+        is_enter = True
+
+        if is_enter:
+            self.startLabel.place_forget()
+            self.mainLabel.place(x=200, y=570)
+            self.update_hunger()
+            self.update_health()
+            self.update_mood()
+            self.update_energy()
+
+            self.update_display()
+
+            is_enter = False
 
     # Функция обновления интерфейса
     def update_display(self):
         if self.is_alive():
-            hungerLabel.config(text="Еда: " + str(self.hunger))
-            healthLabel.config(text="Здоровье: " + str(self.health))
-            moodLabel.config(text="Настроение: " + str(self.mood))
-            energyLabel.config(text="Энергия: " + str(self.energy))
+            self.hungerLabel.config(text="Еда: " + str(self.hunger))
+            self.healthLabel.config(text="Здоровье: " + str(self.health))
+            self.moodLabel.config(text="Настроение: " + str(self.mood))
+            self.energyLabel.config(text="Энергия: " + str(self.energy))
 
             if self.sleepNow:
-                pet.config(image=sleeping)
-                btnWakeUp.place(x=700, y=95)
-                btnFeed.place_forget()
-                btnTreat.place_forget()
-                btnMood.place_forget()
+                self.pet.config(image=self.sleeping)
+                self.btnWakeUp.place(x=700, y=95)
+                self.btnFeed.place_forget()
+                self.btnTreat.place_forget()
+                self.btnMood.place_forget()
             elif self.playNow:
-                pet.config(image=self.play_img)
-                btnStopPlay.place(x=700, y=65)
-                btnFeed.place_forget()
-                btnTreat.place_forget()
-                btnSleep.place_forget()
+                self.pet.config(image=self.play_img)
+                self.btnStopPlay.place(x=700, y=65)
+                self.btnFeed.place_forget()
+                self.btnTreat.place_forget()
+                self.btnSleep.place_forget()
             else:
                 if self.energy <= 30:
-                    pet.config(image=want_sleep)
+                    self.pet.config(image=self.want_sleep)
                 elif self.hunger <= 30:
-                    pet.config(image=hungry)
+                    self.pet.config(image=self.hungry)
                     if self.mood <= 30:
-                        pet.config(image=unhappy)
+                        self.pet.config(image=self.unhappy)
                 elif self.hunger >= 80:
-                    pet.config(image=fat)
+                    self.pet.config(image=self.fat)
                 elif self.mood >= 70:
-                    pet.config(image=happy)
+                    self.pet.config(image=self.happy)
                 elif self.mood <= 30:
-                    pet.config(image=cry)
+                    self.pet.config(image=self.cry)
                 else:
-                    pet.config(image=normal)
+                    self.pet.config(image=self.normal)
         else:
             if self.sleepNow:
-                btnWakeUp.place_forget()
-            pet.config(image=dead)
-            hungerLabel.config(text="")
-            healthLabel.config(text="")
-            moodLabel.config(text="")
-            energyLabel.config(text="")
-            btnSleep.place_forget()
-            btnMood.place_forget()
-            btnTreat.place_forget()
-            btnFeed.place_forget()
+                self.btnWakeUp.place_forget()
+            self.pet.config(image=self.dead)
+            self.hungerLabel.config(text="")
+            self.healthLabel.config(text="")
+            self.moodLabel.config(text="")
+            self.energyLabel.config(text="")
+            self.btnSleep.place_forget()
+            self.btnMood.place_forget()
+            self.btnTreat.place_forget()
+            self.btnFeed.place_forget()
 
-        pet.after(100, self.update_display)
+        self.pet.after(100, self.update_display)
 
     # Функции обновления характеристик
     def update_hunger(self):
@@ -72,20 +154,20 @@ class Character:
 
         if self.is_alive():
             if self.sleepNow:
-                hungerLabel.after(4000, self.update_hunger)
+                self.hungerLabel.after(4000, self.update_hunger)
             elif self.playNow:
-                hungerLabel.after(500, self.update_hunger)
+                self.hungerLabel.after(500, self.update_hunger)
             else:
-                hungerLabel.after(1000, self.update_hunger)
+                self.hungerLabel.after(1000, self.update_hunger)
 
     def update_health(self):
         self.health -= 1
 
         if self.is_alive():
             if self.sleepNow:
-                healthLabel.after(4000, self.update_health)
+                self.healthLabel.after(4000, self.update_health)
             else:
-                healthLabel.after(1000, self.update_health)
+                self.healthLabel.after(1000, self.update_health)
 
     def update_mood(self):
         if self.playNow and self.mood < 100:
@@ -98,11 +180,11 @@ class Character:
         if self.is_alive():
             if self.sleepNow:
                 self.mood += 2
-                moodLabel.after(8000, self.update_mood)
+                self.moodLabel.after(8000, self.update_mood)
             elif self.playNow:
-                moodLabel.after(500, self.update_mood)
+                self.moodLabel.after(500, self.update_mood)
             else:
-                moodLabel.after(1000, self.update_mood)
+                self.moodLabel.after(1000, self.update_mood)
 
     def update_energy(self):
         if self.sleepNow and self.energy < 100:
@@ -114,9 +196,9 @@ class Character:
 
         if self.is_alive():
             if self.playNow or self.sleepNow:
-                energyLabel.after(500, self.update_energy)
+                self.energyLabel.after(500, self.update_energy)
             else:
-                energyLabel.after(1000, self.update_energy)
+                self.energyLabel.after(1000, self.update_energy)
 
     # Функции восполнения характеристик
     def feed(self):
@@ -135,109 +217,34 @@ class Character:
 
     def play(self):
         self.playNow = True
-        self.play_img = random.choice(playing)
+        self.play_img = random.choice(self.playing)
 
     def stop_play(self):
         self.playNow = False
-        btnStopPlay.place_forget()
-        btnFeed.place(x=700, y=5)
-        btnTreat.place(x=700, y=35)
-        btnSleep.place(x=700, y=95)
+        self.btnStopPlay.place_forget()
+        self.btnFeed.place(x=700, y=5)
+        self.btnTreat.place(x=700, y=35)
+        self.btnSleep.place(x=700, y=95)
 
     def sleep(self):
         self.sleepNow = True
 
     def wake_up(self):
         self.sleepNow = False
-        btnFeed.place(x=700, y=5)
-        btnTreat.place(x=700, y=35)
-        btnMood.place(x=700, y=65)
-        btnWakeUp.place_forget()
+        self.btnFeed.place(x=700, y=5)
+        self.btnTreat.place(x=700, y=35)
+        self.btnMood.place(x=700, y=65)
+        self.btnWakeUp.place_forget()
 
     # проверка на живость
     def is_alive(self):
         if self.health <= 0:
-            mainLabel.config(text="Ваш питомец умер :c")
-            mainLabel.place(x=290, y=570)
+            self.mainLabel.config(text="Ваш питомец умер :c")
+            self.mainLabel.place(x=290, y=570)
             return False
         else:
             return True
 
 
 char = Character()
-
-
-# Функция начала игры
-def start(event):
-    is_enter = True
-
-    if is_enter:
-        startLabel.place_forget()
-        mainLabel.place(x=200, y=570)
-        char.update_hunger()
-        char.update_health()
-        char.update_mood()
-        char.update_energy()
-
-        char.update_display()
-
-        is_enter = False
-
-
-# Задание интерфейса
-root = tkinter.Tk()
-root.title("Тамагочи")
-root.geometry("800x600")
-
-# Картинки
-hungry = tkinter.PhotoImage(file="images/want_eat.png")
-normal = tkinter.PhotoImage(file="images/normal.png")
-dead = tkinter.PhotoImage(file="images/error.png")
-happy = tkinter.PhotoImage(file="images/happy.png")
-unhappy = tkinter.PhotoImage(file="images/unhappy.png")
-sleeping = tkinter.PhotoImage(file="images/sleep.png")
-want_sleep = tkinter.PhotoImage(file="images/want_sleep.png")
-fat = tkinter.PhotoImage(file="images/fat.png")
-cry = tkinter.PhotoImage(file="images/cry.png")
-rock = tkinter.PhotoImage(file="images/rock.png")
-guitar = tkinter.PhotoImage(file="images/guitar.png")
-music = tkinter.PhotoImage(file="images/music.png")
-war = tkinter.PhotoImage(file="images/war.png")
-
-playing = [rock, guitar, music, war]
-
-# Картинка хомяка
-pet = tkinter.Label(root, image=normal)
-
-# Текстовые поля
-startLabel = tkinter.Label(root, text="Чтобы начать игру, нажмите Enter", font=('Helvetica', 14))
-mainLabel = tkinter.Label(root, text="Заботьтесь о Сене, не дайте ему погибнуть!", font=('Helvetica', 14))
-hungerLabel = tkinter.Label(root, text="Еда: " + str(char.hunger), font=('Helvetica', 10))
-healthLabel = tkinter.Label(root, text="Здоровье: " + str(char.health), font=('Helvetica', 10))
-moodLabel = tkinter.Label(root, text="Настроение: " + str(char.mood), font=('Helvetica', 10))
-energyLabel = tkinter.Label(root, text="Энергия: " + str(char.energy), font=('Helvetica', 10))
-
-# Кнопки
-btnFeed = tkinter.Button(root, text="Покормить", width=10, height=1, font=('Helvetica', 10), command=char.feed)
-btnTreat = tkinter.Button(root, text="Лечить", width=10, height=1, font=('Helvetica', 10), command=char.treat)
-btnMood = tkinter.Button(root, text="Играть", width=10, height=1, font=('Helvetica', 10), command=char.play)
-btnSleep = tkinter.Button(root, text="Спать", width=10, height=1, font=('Helvetica', 10), command=char.sleep)
-btnWakeUp = tkinter.Button(root, text="Проснуться", width=10, height=1, font=('Helvetica', 10), command=char.wake_up)
-btnStopPlay = tkinter.Button(root, text="Прекратить", width=10, height=1, font=('Helvetica', 10), command=char.stop_play)
-
-# Закрепление на экране
-startLabel.place(x=240, y=570)
-hungerLabel.place(x=5, y=5)
-healthLabel.place(x=5, y=35)
-moodLabel.place(x=5, y=65)
-energyLabel.place(x=5, y=95)
-pet.place(x=135, y=30)
-btnFeed.place(x=700, y=5)
-btnTreat.place(x=700, y=35)
-btnMood.place(x=700, y=65)
-btnSleep.place(x=700, y=95)
-
-# Запуск
-root.bind('<Return>', start)
-root.resizable(width=False, height=False)
-root.mainloop()
+char.start_game()
