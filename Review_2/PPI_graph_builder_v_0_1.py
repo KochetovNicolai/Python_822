@@ -24,15 +24,22 @@ import warnings
 from Bio import Entrez
 from Bio import Medline
 
-print('Welcome to PPI Graph Builder!\nPlease enter your search query:')
+print('Welcome to PPI Graph Builder!\nPlease enter your search query (e.g. cancer):')
 term_to_search = input()
-print('Enter max number of abstracts to process')
-retm = int(input())
+print('Enter max number of abstracts to process:')
+inputNumberFlag = 1
+while inputNumberFlag:
+    userInput = input()
+    try:
+        retm = int(userInput)
+        if retm < 0:
+            raise ValueError
+        else:
+            inputNumberFlag = 0
+    except ValueError:
+        print('Please type int numeric value > 0!')
 
-print('Starting...')
-
-
-print('Fetching abstracts from PubMed...')
+print('Starting...\nFetching abstracts from PubMed...')
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     handle = Entrez.esearch(db="pubmed",
@@ -53,22 +60,19 @@ with warnings.catch_warnings():
 # Опыт показывает, что некоторые записи в формате MEDLINE не имеют abstract'a, поэтому мы такие статьи будем пропускать:
 
 abstracts = []
-k = 0
+MedlineIDswoAbstracts = 0
 for i in range(len(records)):
     try:
         abstracts.append(records[i]['AB'])
     except:
-        k = k + 1
-        print('problem: no abstracts for this ID found! ID =', i)
+        MedlineIDswoAbstracts += 1
+        print('problem: no abstracts for this ID found! ID =', MedlineIDswoAbstracts)
 
+raw_abstracts_fileName = 'raw_abstracts.txt'
 
-# In[8]:
-
-
-raw_abstracts_file = open('raw_abstracts.txt', 'w')
-for abstract in abstracts:
-    raw_abstracts_file.write(abstract + '\n-----\n')
-raw_abstracts_file.close()
+with open(raw_abstracts_fileName, 'w') as raw_abstracts_file:
+    for abstract in abstracts:
+        raw_abstracts_file.write(abstract + '\n-----\n')
       
 print('Fetching finished.\nTotal amount of abstracts: ', len(abstracts), '\nAbstracts were saved to file raw_abstracts.txt')
 
@@ -78,14 +82,11 @@ print('Fetching finished.\nTotal amount of abstracts: ', len(abstracts), '\nAbst
 
 # Информация по данному REST API находится здесь: https://extract.jensenlab.org/
 
-# In[10]:
 
 
-path_to_abstacts = 'raw_abstracts.txt'
-abstracts = open(path_to_abstacts).read().split('\n-----\n')[:-1]
-
-
-# In[11]:
+path_to_abstracts = 'raw_abstracts.txt'
+with open(path_to_abstracts) as abstractsFile:
+    abstracts = abstractsFile.read().split('\n-----\n')[:-1]
 
 print('Finding proteins...')
 
@@ -117,7 +118,6 @@ def find_all_proteins(source):
     '''
     source_2sect = source.split('<div class=\"reflect_entities\" style=\"display: none;\">')
     sentence_prot_id_and_name = []
-    k = 1
     for one_sentence in source_2sect[0].split('. '):
         proteins = []
         all_text_res = bs4.BeautifulSoup(one_sentence, features="html.parser").findAll('span')
@@ -128,7 +128,6 @@ def find_all_proteins(source):
                 proteins.append([name_id, name])
         if len(proteins) > 1:
             sentence_prot_id_and_name.append(proteins)
-        k += 1
     
     #appending database id
     for sentence in sentence_prot_id_and_name:
@@ -175,29 +174,24 @@ def create_protein_DB(all_proteins_list):
 
 protDB = create_protein_DB(all_proteins_list)
 
-len(protDB)
-
 # Записываем все найденные белки в файл:
 
-# In[17]:
-
-raw_proteins_in_sentences_file = open('proteins_in_sentences.txt', 'w')
-for text in all_proteins_list:
-    for sentence in text:
-        for protein in sentence:
-            raw_proteins_in_sentences_file.write(protein[2] + '; ')
-        raw_proteins_in_sentences_file.write('\n')
-    raw_proteins_in_sentences_file.write('-----\n')
-raw_proteins_in_sentences_file.close()
+pathToProteins_in_sentences = 'proteins_in_sentences.txt'
+with open(pathToProteins_in_sentences, 'w') as raw_proteins_in_sentences_file:
+    for text in all_proteins_list:
+        for sentence in text:
+            for protein in sentence:
+                raw_proteins_in_sentences_file.write(protein[2] + '; ')
+            raw_proteins_in_sentences_file.write('\n')
+        raw_proteins_in_sentences_file.write('-----\n')
 
 print('All proteins were found! They were saved to file proteins_in_sentences.txt')
 
 # Запишем так же БД имен встреченных в текстах белков для дальнейшей их расшифровки:
 
-prot_db_file = open('protDB.txt', 'w')
-for unique_prot in protDB:
-    prot_db_file.write(unique_prot[0] + ': ' + '; '.join(unique_prot[1]) + '\n')
-prot_db_file.close()
+with open('protDB.txt', 'w') as prot_db_file:
+    for unique_prot in protDB:
+        prot_db_file.write(unique_prot[0] + ': ' + '; '.join(unique_prot[1]) + '\n')
 
 
 print('Building co-occurence matrix...')
@@ -208,9 +202,9 @@ print('Building co-occurence matrix...')
 #each contains list of sentences, 
 #each contains list of unique proteins, if there are more than 1
 
-raw_proteins_in_sentences = open(
-    'proteins_in_sentences.txt', 'r'
-    ).read().split('-----\n')
+path_to_raw_proteins = 'proteins_in_sentences.txt'
+with open(path_to_raw_proteins) as rawProteinsFile:
+    raw_proteins_in_sentences = rawProteinsFile.read().split('-----\n')
 
 proteins_from_file = []
 
@@ -253,7 +247,6 @@ for one_id in all_proteins:
     for names in protDB:
         if names[0] == one_id:
             prot_names.append(min(names[1], key = len))
-len(prot_names)
 
 # ## Часть 4: py2cytoscape (визуализация через CyREST API) 
 
@@ -277,9 +270,8 @@ cy.style.apply(style=style_s2, network=net1)
 
 cy.layout.fit(network=net1)
 
-final_result = open('PPI_PDF_result.pdf', 'wb')
-final_result.write(net1.get_pdf())
-final_result.close()
+PPI_PDF_resultFile = 'PPI_PDF_result.pdf'
+with open(PPI_PDF_resultFile, 'wb') as final_result:
+    final_result.write(net1.get_pdf())
 
 print('All processes finished.')
-
