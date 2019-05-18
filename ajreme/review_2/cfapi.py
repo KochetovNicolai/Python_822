@@ -1,11 +1,12 @@
 from time import time
-from requests import get
 from pathlib import Path
 from hashlib import sha512
 from tabulate import tabulate
 from datetime import datetime
 from random import SystemRandom
 from webbrowser import open_new_tab
+from os.path import join as join_path
+from requests import get as http_request
 from string import ascii_lowercase, digits
 
 
@@ -32,6 +33,12 @@ def listTypeChecker(values, expected, canBeNone):
     '''
     for i in range(len(values)):
         typeChecker(values[i], expected[i], canBeNone[i])
+
+
+class UnexpectedResponce(Exception):
+
+    def __init__(self, message):
+        super().__init__(message)
 
 
 class CodeforcesEntity:
@@ -474,7 +481,7 @@ class CodeforcesAPI:
         return self._get_url(**kwargs)
 
     def _check_request(self, request):
-        if request.ok is False:
+        if not request.ok:
             raise ConnectionError('Request status \
                                   is {}'.format(self.last_api.status_code))
 
@@ -492,11 +499,20 @@ class CodeforcesAPI:
         Example: cf.request_api('user.info', handles=['tourist', 'Petr'])
         '''
         typeChecker(method, str)
-        self.last_api = get(self._api_link +
+        self.last_api = http_request(
+                            self._api_link +
                             method + '?' +
-                            self._url_api_request(method, **kwargs))
+                            self._url_api_request(method, **kwargs)
+        )
         self._check_request(self.last_api)
-        self.last_api = self.last_api.json()
+        try:
+            self.last_api = self.last_api.json()
+        except JSONDecodeError:
+            raise UnexpectedResponce('Codeforces API has returned not json')
+        if self.last_api.get('status') is None:
+            raise UnexpectedResponce(
+                'There is no \"status\" field in response. Codeforces API changed?'
+            )
         if self.last_api['status'] != 'OK':
             raise ConnectionError('Codeforces API error: \
                                   {}', self.last_api['comment'])
@@ -872,9 +888,9 @@ class ext_CodeforcesAPI(CodeforcesAPI):
         '''
         Saves file str as <name> in working directory.
         If workingDir is not provided, data will be
-        save in directory with this file.
+        saved in directory with this file.
         '''
-        with open(self.get_workingDir + '/' + name, 'w') as stream:
+        with open(join_path(self.get_workingDir, name), 'w') as stream:
             stream.write(str(file))
 
     def _hack_format(self, succ, unsucc):
@@ -972,7 +988,7 @@ class ext_CodeforcesAPI(CodeforcesAPI):
         http://codeforces.com/<link>
         '''
         params['locale'] = self.language
-        self.last_page = get(self._site_link + link, params=params)
+        self.last_page = http_request(self._site_link + link, params=params)
         self._check_request(self.last_page)
         return self.last_page.text
 
