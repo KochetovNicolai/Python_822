@@ -27,13 +27,13 @@ class VkBot:
             return "Город назовите, погоду в котором узнать хотите вы(языке на русском)", self._flag
 
         elif message.upper() == self._COMMANDS[2]:
-            return Functions.get_time(Functions), self._flag
+            return Functions.get_time(), self._flag
 
         elif message.upper().startswith(self._COMMANDS[3]):
             return "Свидания до, {}!".format(self._USERNAME), self._flag
 
         elif message.upper() == self._COMMANDS[4]:
-            return Functions.get_date(Functions), self._flag
+            return Functions.get_date(), self._flag
 
         else:
             return "Вас не понимаю я", self._flag

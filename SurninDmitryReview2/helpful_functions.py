@@ -1,6 +1,5 @@
 import requests
 import bs4
-from string import ascii_letters
 
 
 class Functions:
@@ -10,10 +9,10 @@ class Functions:
         bs = bs4.BeautifulSoup(request.text, "html.parser")
 
         try:
-            user_name = self._clean_all_tag_from_str(bs.findAll("title")[0])
+            kek = bs.findAll("title")
         except:
             return 'Unknown name'
-        return user_name.split()[0]
+        return kek[0].text.split()[0]
 
     @staticmethod
     def _clean_all_tag_from_str(string_line):
@@ -60,32 +59,29 @@ class Functions:
             return 'Unknown weather'
         return result
 
-    def get_time(self):
+    @staticmethod
+    def get_time():
         try:
             request = requests.get("https://my-calend.ru/date-and-time-today")
             b = bs4.BeautifulSoup(request.text, "html.parser")
             all_info_from_page = b.select(".page")[0]  # возвращает всю информацию со страницы
             find_time = all_info_from_page.findAll("h2")[1]  # возвращает не распаршенную информацию о времени
             # (она идет во втором блоке h2)
-            time = self._clean_all_tag_from_str(str(find_time)).split()[1]  # парсит информацию
         except:
             return 'Unknown time'
-        return time
+        return find_time.text
 
     # аналогичная ситуация с датой
 
-    def get_date(self):
+    @staticmethod
+    def get_date():
         try:
             request = requests.get("https://my-calend.ru/date-and-time-today")
             b = bs4.BeautifulSoup(request.text, "html.parser")
             all_info_from_page = b.select(".page")[0]
             find_date = all_info_from_page.findAll("h2")[0]
-            time = self._clean_all_tag_from_str(str(find_date)).split()
-            result = ''
-            for i in range(len(time)):
-                result += time[i]
-                result += ' '
+            time = find_date.text
         except:
             return 'Unknown date'
-        return result
+        return time
 
