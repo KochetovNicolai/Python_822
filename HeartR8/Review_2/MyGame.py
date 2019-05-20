@@ -1,21 +1,20 @@
 import arcade
 import random
-import UI
+from UI import UI, Text
+from UI.Buttons import FractionChooseButton, StartTextButton, CreateUnitButton
 import GameField
-import Game_classes
+from Fractions import CriminalFraction, BotansFraction, MajorsFraction, PartyFraction
 import pygame
-import os
 
 
 class MyGame(arcade.Window):
     def __init__(self, field_size, player_list, name_list):
         pygame.mixer.init()
-        pygame.mixer.music.load('../Background_music.wav')
+        pygame.mixer.music.load('music/Background_music.wav')
         pygame.mixer.music.play(-1)
         super().__init__(title="School battle", resizable=True, fullscreen=True)
         arcade.set_background_color(arcade.color.WHITE)
         self.name_list = name_list
-        self.pause = False
         self.button_list = None
         self.player_list = player_list
         self.field = GameField.GameField(min(self.width, self.height) // 4 * 3, field_size)
@@ -25,15 +24,15 @@ class MyGame(arcade.Window):
         self.game_started = False
         self.background = None
         self.fractions_chosen = False
-        self.frac_list = [Game_classes.CriminalFraction,
-                          Game_classes.MajorsFraction,
-                          Game_classes.PartyFraction,
-                          Game_classes.BotansFraction]
+        self.frac_list = [CriminalFraction.CriminalFraction,
+                          MajorsFraction.MajorsFraction,
+                          PartyFraction.PartyFraction,
+                          BotansFraction.BotansFraction]
         self.fraction_choose_buttons_list = []
         self.fraction_names = ['Преступники',
                                'Мажоры',
                                'Тусовщики',
-                               'Ботаны',]
+                               'Ботаны']
 
         self.frac_choose_but_between_center = 50
         self.frac_choose_but_x_coef = 0.5
@@ -62,48 +61,78 @@ class MyGame(arcade.Window):
 
     def setup(self):
         self.button_list = []
-        self.background = arcade.load_texture("../BG2.jpg")
+        self.background = arcade.load_texture("Images/BG2.jpg")
 
-        quit_button = UI.StartTextButton(self.left_menu_but_pos, self.bottom_menu_but,
-                                         self.close_program, "Выход",
-                                         self.menu_but_size_x, self.menu_but_size_y)
+        quit_button = StartTextButton.StartTextButton(self.left_menu_but_pos, self.bottom_menu_but,
+                                                      self.close_program, "Выход",
+                                                      self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(quit_button)
 
-        next_button = UI.StartTextButton(self.left_menu_but_pos + self.delta_menu_but, self.bottom_menu_but,
-                                         self.next_player, "Следующий игрок",
-                                         self.menu_but_size_x, self.menu_but_size_y)
+        next_button = StartTextButton.StartTextButton(self.left_menu_but_pos + self.delta_menu_but, self.bottom_menu_but,
+                                                      self.next_player, "Следующий игрок",
+                                                      self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(next_button)
 
-        play_button = UI.StartTextButton(self.left_menu_but_pos + self.delta_menu_but * 2, self.bottom_menu_but,
-                                         self.refresh_program, "Обновить",
-                                         self.menu_but_size_x, self.menu_but_size_y)
+        play_button = StartTextButton.StartTextButton(self.left_menu_but_pos + self.delta_menu_but * 2,
+                                                      self.bottom_menu_but,
+                                                      self.refresh_program, "Обновить",
+                                                      self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(play_button)
 
-        start_game_button = UI.StartTextButton(self.left_menu_but_pos + self.delta_menu_but * 3, self.bottom_menu_but,
-                                               self.start_game_program, "Старт",
-                                               self.menu_but_size_x, self.menu_but_size_y)
+        start_game_button = StartTextButton.StartTextButton(self.left_menu_but_pos + self.delta_menu_but * 3,
+                                                            self.bottom_menu_but,
+                                                            self.start_game_program, "Старт",
+                                                            self.menu_but_size_x, self.menu_but_size_y)
         self.button_list.append(start_game_button)
 
         self.player_list[0] = self.frac_list[0](self.field.size, self.width, self.height)
 
         for i in range(self.units_amount):
-            create_unit_button = UI.CreateUnitButton(self.width * self.unit_but_x_coef,
-                                                     self.height * self.unit_but_y_coef - i * self.unit_but_between,
-                                                     self.unit_but_size_x,
-                                                     self.unit_but_size_y,
-                                                     self.player_list[0].create_unit,
-                                                     Game_classes.Offnik,
+            create_unit_button = CreateUnitButton.CreateUnitButton(self.width * self.unit_but_x_coef,
+                                                                   self.height * self.unit_but_y_coef - i * self.unit_but_between,
+                                                                   self.unit_but_size_x,
+                                                                   self.unit_but_size_y,
+                                                                   self.player_list[0].create_unit,
+                                                                   CriminalFraction.Offnik,
                                                      '',
-                                                     self.field.cell_size,
-                                                     self.player_list[0].base.place)
+                                                                   self.field.cell_size,
+                                                                   self.player_list[0].base.place)
             self.button_list.append(create_unit_button)
 
         for i in range(len(self.frac_list)):
-            self.fraction_choose_buttons_list.append(UI.FractionChooseButton(self.width * self.frac_choose_but_x_coef,
-                                                                             self.height * self.frac_choose_but_y_coef + self.frac_choose_but_between_center * 2 - self.frac_choose_but_between_center * i,
-                                                                             self.create_fraction,
-                                                                             self.frac_list[i],
-                                                                             self.fraction_names[i]))
+            self.fraction_choose_buttons_list.append(
+                FractionChooseButton.FractionChooseButton(self.width * self.frac_choose_but_x_coef,
+                                                          self.height * self.frac_choose_but_y_coef + self.frac_choose_but_between_center * 2 - self.frac_choose_but_between_center * i,
+                                                          self.create_fraction,
+                                                          self.frac_list[i],
+                                                          self.fraction_names[i]))
+
+    def determ_buttons(self):
+        for i in range(len(self.button_list) - self.start_menu_buttons_amount, len(self.button_list)):
+            self.button_list[i].action_function = self.player_list[self.turn].create_unit
+            temporary = self.player_list[self.turn].name_units[
+                i - len(self.button_list) + self.start_menu_buttons_amount]
+            self.button_list[i].unit_type = temporary
+            temporary = self.player_list[self.turn].name_units_text[
+                i - len(self.button_list) + self.start_menu_buttons_amount]
+            self.button_list[i].text = temporary
+            temporary = self.player_list[self.turn].base.place
+            self.button_list[i].base_position = temporary
+
+    def draw_players_base(self, delta_size_pix):
+        for i in self.player_list:
+            arcade.draw_rectangle_filled(
+                i.base.place[0] * self.field.cell_size + self.field.left_border - self.field.cell_size // 2,
+                i.base.place[1] * self.field.cell_size + self.field.bottom_border - self.field.cell_size // 2,
+                self.field.cell_size - delta_size_pix,
+                self.field.cell_size - delta_size_pix,
+                color=arcade.color.GRAY_ASPARAGUS)
+            base_owner = Text.Text(i.name,
+                                   i.base.place[
+                                     1] * self.field.cell_size + self.field.bottom_border - self.field.cell_size // 2,
+                                   i.base.place[
+                                     0] * self.field.cell_size + self.field.left_border - self.field.cell_size // 2)
+            base_owner.draw_text()
 
     def on_draw(self):
         arcade.start_render()
@@ -123,44 +152,28 @@ class MyGame(arcade.Window):
                 button.draw()
 
             if self.game_started:
-                for i in range(len(self.button_list) - self.start_menu_buttons_amount, len(self.button_list)):
-                    self.button_list[i].action_function = self.player_list[self.turn].create_unit
-                    temporary = self.player_list[self.turn].name_units[i - len(self.button_list) + self.start_menu_buttons_amount]
-                    self.button_list[i].unit_type = temporary
-                    temporary = self.player_list[self.turn].name_units_text[i - len(self.button_list) + self.start_menu_buttons_amount]
-                    self.button_list[i].text = temporary
-                    temporary = self.player_list[self.turn].base.place
-                    self.button_list[i].base_position = temporary
+                self.determ_buttons()
 
             delta_size_pix = 5
 
-            for i in self.player_list:
-                arcade.draw_rectangle_filled(i.base.place[0] * self.field.cell_size + self.field.left_border - self.field.cell_size // 2,
-                                             i.base.place[1] * self.field.cell_size + self.field.bottom_border - self.field.cell_size // 2,
-                                             self.field.cell_size - delta_size_pix,
-                                             self.field.cell_size - delta_size_pix,
-                                             color=arcade.color.GRAY_ASPARAGUS)
-                base_owner = UI.Text(i.name,
-                                     i.base.place[1] * self.field.cell_size + self.field.bottom_border - self.field.cell_size // 2,
-                                     i.base.place[0] * self.field.cell_size + self.field.left_border - self.field.cell_size // 2)
-                base_owner.draw_text()
+            self.draw_players_base(delta_size_pix)
 
             for button in self.highlighted_cells:
                 button.draw()
 
-            information_txt = UI.Text(self.player_list[self.turn].info_about_units(),
-                                      self.height * self.information_txt_y_coef,
-                                      self.width * self.information_txt_x_coef,
-                                      font=16)
+            information_txt = Text.Text(self.player_list[self.turn].info_about_units(),
+                                        self.height * self.information_txt_y_coef,
+                                        self.width * self.information_txt_x_coef,
+                                        font=16)
             information_txt.draw_text()
 
             self.player_list[self.turn].unit_info.draw_text()
         else:
             for button in self.fraction_choose_buttons_list:
                 button.draw()
-                text = UI.Text('Игрок {}'.format(self.turn + 1),
-                               self.height * self.frac_choose_but_x_coef + self.upper_than_frac_ch_but,
-                               self.width * self.frac_choose_but_y_coef)
+                text = Text.Text('Игрок {}'.format(self.turn + 1),
+                                 self.height * self.frac_choose_but_x_coef + self.upper_than_frac_ch_but,
+                                 self.width * self.frac_choose_but_y_coef)
                 text.draw_text()
 
     def update(self, delta_time):
@@ -171,6 +184,9 @@ class MyGame(arcade.Window):
             self.field.field_info = [[None for i in range(self.field.size)] for j in range(self.field.size)]
 
             for i in self.player_list:
+
+                for j in range(2, 6):
+                    self.button_list[j].updated = True
 
                 if i.next_turn and (i.money == 0):
                     i.next_turn = False
@@ -218,7 +234,6 @@ class MyGame(arcade.Window):
         self.field.base_list.append(self.player_list[i].base.place)
 
     def refresh_program(self):
-        self.pause = False
         self.field.base_list = []
         for i in range(len(self.player_list)):
             self.place_bases(i)
