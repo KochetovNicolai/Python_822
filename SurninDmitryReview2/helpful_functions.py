@@ -1,5 +1,6 @@
 import requests
 import bs4
+import json
 
 
 class Functions:
@@ -81,3 +82,9 @@ class Functions:
             return 'Unknown date'
         return time
 
+    @staticmethod
+    def get_fact():
+        cat_fact_url = "https://catfact.ninja/fact?max_length=140"
+        response = requests.get(cat_fact_url)
+        information = json.loads(response.text)
+        return information['fact']
