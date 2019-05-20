@@ -40,20 +40,16 @@ class Functions:
             return "Я не знаю такого города"
         b = bs4.BeautifulSoup(request.text, "html.parser")
         try:
-            p3 = b.select('.temperature .p3')
-            weather1 = p3[0].getText()
-            p4 = b.select('.temperature .p4')
-            weather2 = p4[0].getText()
-            p5 = b.select('.temperature .p5')
-            weather3 = p5[0].getText()
-            p6 = b.select('.temperature .p6')
-            weather4 = p6[0].getText()
+            temperature = []
+            for i in range(3, 7):
+                k = b.select('.temperature .p{}'.format(i))
+                temperature.append(k[0].getText())
 
             result = ''
-            result = result + ('Утром :' + weather1 + ' ' + weather2) + '\n'
-            result = result + ('Днём :' + weather3 + ' ' + weather4) + '\n'
-            temp = b.select('.rSide .description')
-            weather = temp[0].getText()
+            result = result + ('Утром :' + temperature[0] + ' ' + temperature[1]) + '\n'
+            result = result + ('Днём :' + temperature[2] + ' ' + temperature[3]) + '\n'
+            description = b.select('.rSide .description')
+            weather = description[0].getText()
             result = result + weather.strip()
         except:
             return 'Unknown weather'

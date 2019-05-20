@@ -14,25 +14,26 @@ class VkBot:
     def new_message(self, message, flag):
 
         self._flag = flag
+        message = message.upper()
 
         if self._flag == 'weather':
             self._flag = None
-            return Functions.get_weather(str(message)), self._flag
+            return Functions.get_weather(str(message.lower())), self._flag
 
-        elif message.upper().startswith(self._COMMANDS[0]):
+        elif message.startswith(self._COMMANDS[0]):
             return "Здравствуй, {}!".format(self._USERNAME), self._flag
 
-        elif message.upper() == self._COMMANDS[1]:
+        elif message == self._COMMANDS[1]:
             self._flag = 'weather'
-            return "Город назовите, погоду в котором узнать хотите вы(языке на русском)", self._flag
+            return "Город назовите, погоду в котором узнать хотите вы (языке на русском)", self._flag
 
-        elif message.upper() == self._COMMANDS[2]:
+        elif message == self._COMMANDS[2]:
             return Functions.get_time(), self._flag
 
-        elif message.upper().startswith(self._COMMANDS[3]):
+        elif message.startswith(self._COMMANDS[3]):
             return "Свидания до, {}!".format(self._USERNAME), self._flag
 
-        elif message.upper() == self._COMMANDS[4]:
+        elif message == self._COMMANDS[4]:
             return Functions.get_date(), self._flag
 
         else:
