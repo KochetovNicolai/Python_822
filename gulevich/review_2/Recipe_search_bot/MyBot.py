@@ -115,7 +115,11 @@ class Manager:
             for i in range(count):
                 recipe = info[i]['recipe']
                 M.bot.send_message(message.chat.id, recipe['label'] + '\n' + recipe['url'])
-                M.bot.send_photo(message.chat.id, recipe['image'])
+
+                try:
+                    M.bot.send_photo(message.chat.id, recipe['image'])
+                except Exception:
+                    pass
 
                 M.bot.send_message(message.chat.id, 'Total time: ' + str(int(recipe['totalTime'])) + ' minutes')
                 answer = 'Ingredients:\n'
