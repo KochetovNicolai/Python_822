@@ -86,5 +86,9 @@ class Functions:
     def get_fact():
         cat_fact_url = "https://catfact.ninja/fact?max_length=140"
         response = requests.get(cat_fact_url)
-        information = json.loads(response.text)
+        if response.ok:
+            try:
+                information = json.loads(response.text)
+            except ValueError:
+                return 'Service is unavailable'
         return information['fact']
