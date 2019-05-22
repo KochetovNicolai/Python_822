@@ -13,15 +13,13 @@ class Plot:
 
         table['mean'] = (table['high'] + table['low']) / 2.0
 
-        _, ax = plt.subplots()
-
         fig = plt.figure(
             figsize=(18, 9),
             facecolor='ivory',
             dpi=250
         )
 
-        plt.title('{} stock prices for the recent 36 months'.format(company[0]), fontsize=24)
+        plt.title('{} stock prices for the recent {} months'.format(company[0], self.duration), fontsize=24)
 
         plt.xlabel(
             'Date',  # Текст
@@ -61,7 +59,11 @@ class Plot:
             dpi=250
         )
 
-        plt.title('Compare {} stock prices for the recent 36 months'.format(', '.join(companies)), fontsize=24)
+        plt.title(
+            'Compare {} stock prices for the recent  {} months'.format(
+                ', '.join(companies),
+                self.duration), fontsize=24
+        )
 
         plt.xlabel(
             'Date',  # Текст
