@@ -36,6 +36,7 @@ class Button:
         return text_surface
 
     def is_inside(self, mouse_pos):
+        print(self.y + Button.height)
         if (
                 self.x < mouse_pos[0] < self.x + Button.widht and
                 self.y < mouse_pos[1] < self.y + Button.height
