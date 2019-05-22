@@ -1,9 +1,12 @@
 import data_collecting
 import plots
+import errors
 from flask import Flask
 from flask import render_template
 from flask import redirect
 from flask import request
+from urllib.parse import urlencode
+from urllib.parse import urljoin
 
 app = Flask(__name__)
 
@@ -28,11 +31,13 @@ def find_data():
         return redirect('/index')
 
     if len(company) == 2:
-        return redirect('/twin/?first={}&second={}'.format(company[0], company[1]))
+        query = {'first': company[0], 'second': company[1]}
+        return redirect('/twin/?' + urlencode(query))
     if len(company) == 1:
-        return redirect('/single/?company={}'.format(company[0]))
+        query = {'company': company[0]}
+        return redirect('/single/?' + urlencode(query))
     elif len(company) > 2:
-        return redirect('/error')
+        return errors.error_redirect(1)
 
 
 @app.route('/twin/')
@@ -54,13 +59,13 @@ def twin():
         try:
             collector.pull_data(company)
         except Exception:
-            return redirect('/error/?type=wrong_corp')
+            return errors.error_redirect(2)
 
         tables.append(collector.frame)
 
-    path = plot.twin_table_plot(tables, companies, twin_graph)
+    path = urljoin('/static/', plot.twin_table_plot(tables, companies, twin_graph))
 
-    html = render_template('graph.html', company=' '.join(companies), img_path='/static/{}'.format(path))
+    html = render_template('graph.html', company=' '.join(companies), img_path=path)
 
     return html
 
@@ -69,10 +74,12 @@ def twin():
 def error():
     error_type = request.args.get('type')
 
-    if error_type == 'wrong_corp':
-        message = 'You have inserted wrong company name('
-    elif error_type == 'plot_error':
+    if error_type == '2':
+        message = 'You have inserted the wrong company name('
+    elif error_type == '3':
         message = 'Unable to draw a plot('
+    elif error_type == '1':
+        message = 'You have inserted too much companies'
     else:
         message = 'Unknown error!'
 
@@ -93,16 +100,16 @@ def single():
     try:
         prices.pull_data(company)
     except Exception:
-        return redirect('/error/?type=wrong_corp')
+        return errors.error_redirect(2)
 
     plot = plots.Plot()
 
     try:
-        path = plot.table_to_plot(prices.frame, company)
+        path = urljoin('/static/', plot.table_to_plot(prices.frame, company))
     except Exception:
-        return redirect('/error/?type=plot_error')
+        return errors.error_redirect(3)
 
-    html = render_template('graph.html', company=company, img_path='/static/{}'.format(path))
+    html = render_template('graph.html', company=company, img_path=path)
 
     return html
 
