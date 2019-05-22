@@ -1,4 +1,4 @@
-def strange_formula(n, cost, amount):
+def has_enough_money(n, cost, amount):
     return round(cost * 10 * (1.1 ** n - 1), 4) <= amount
 
 def button_rectangle(screen, font, text, font_color, fill_color, coords, f):
