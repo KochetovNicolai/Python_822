@@ -6,6 +6,7 @@ from sqlalchemy import (
     Integer, SmallInteger, String, Date, DateTime, Float, Boolean, Text, LargeBinary)
 
 from scrapy.utils.project import get_project_settings
+from scrapy_spider.settings import *
 
 DeclarativeBase = declarative_base()
 
@@ -15,6 +16,7 @@ def db_connect():
     Returns sqlalchemy engine instance
     """
     return create_engine(get_project_settings().get("CONNECTION_STRING"))
+    #return create_engine('sqlite:///:memory:', echo=False)
 
 def create_table(engine):
     DeclarativeBase.metadata.create_all(engine)

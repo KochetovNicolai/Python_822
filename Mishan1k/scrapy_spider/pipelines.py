@@ -7,6 +7,8 @@
 
 from sqlalchemy.orm import sessionmaker
 from scrapy_spider.models import QuoteDB, db_connect, create_table
+from script import find_quotes
+list_of_quotes = []
 
 class ScrapySpiderPipeline(object):
     def __init__(self):
@@ -30,11 +32,29 @@ class ScrapySpiderPipeline(object):
         try:
             session.add(quotedb)
             session.commit()
+                
+                # find_quotes()
+                #for quote in session.query(QuoteDB.quote).filter(QuoteDB.author=='Albert Einstein'):
+                # print (quote)
 
         except:
             session.rollback()
             raise
         finally:
+            
+            print(list_of_quotes)
             session.close()
         
+        
         return item
+
+    def close_spider(self, spider):
+        session = self.Session()
+        while True:
+            name = input("Enter author full name, whose quotes you want to recieve : ").strip()
+            if name == 'stop':
+                break
+            find_quotes(name)
+        session.close()
+
+
