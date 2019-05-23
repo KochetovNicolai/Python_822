@@ -8,4 +8,4 @@ if __name__ == "__main__":				# check whether the executable file is the main pr
 
 # to do:
 # take information from the boxes and save it in a database
-# shoing information about person's deadlines
+# showing information about person's deadlines

@@ -5,7 +5,6 @@
   <head>
 	<meta charset="utf-8">
    	<title>Deadline Countdown</title>
-   	<link rel="shortcut icon" href="favicon.ico" /> <!-- Эта штука не работает, но должна добавлять иконку к заголовку сайта :) -->
    	<style>
       #AddForm {
        	width: 300px;
@@ -36,33 +35,30 @@
 
 	<!-- Поле для добавления нового дедлайна, открывающееся по кнопке "Add new event" -->
   	<div id="AddNewEvent">
-	  <h2>Have new tasks to do? Add it to your list!</h2> 
-	   
+	  <h2>Have new tasks to do? Add it to your list!</h2>
+
 	  <div id="AddForm">
 	  	<form action="add_deadline" method="post" name="login_form">
 	   	  <h3>Title: <input name="title" type="text" /></h3>
 	   	  <h3>Details: <textarea name="details"> </textarea></h3>
 	   	  <h3>Select date: <input name="date" type="date" /></h3>
 	  	  <h3>Select time: <input name="time" type="time" /></h3>
-	      <p><input type="submit" class="floated" name="add event" value="Add event" /> 
+	      <p><input type="submit" class="floated" name="add event" value="Add event" />
 	      <a href="#">
 	        <h3><input type="button" class="floated" name="close window" value="Close" /></h3>
 		  </a></p><br>
 		</form>
 	  </div>
-	     
+
 	  <a href="#AddForm">
 	    <h3><input type="button" name="add new event" value="Add new event" /></h3>
 	  </a>
 	</div>
 
-
-	<!--<p><img src="1.jpg" alt="желтая собака"></p>-->
-
 	<!-- Список уже зафиксированных дедлайнов -->
 	<div id="ListOfDeadlines">
 	  <h1>Here are your upcoming deadlines:</h1>
-	  <p>*list of deadlines*</p>
+
 	</div>
 
   </body>
