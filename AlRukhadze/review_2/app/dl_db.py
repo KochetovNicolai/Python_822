@@ -31,3 +31,4 @@ class Deadline(db.Model):
 
 
 db.create_all()                     # создание бд по указанным параметрам
+
