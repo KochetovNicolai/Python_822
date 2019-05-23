@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Current deadlines</title>
+</head>
+<body>
+  <!-- Список уже зафиксированных дедлайнов -->
+	<div id="ListOfDeadlines">
+	  <h1>Here are your upcoming deadlines:</h1>
+	    <div class="show_deadlines">
+          {% for i in cur_list%}
+              <li>{{ str(i.d_title), str(i.d_details) }}</li>
+          {% endfor %}
+        </div>
+	</div>
+</body>
+</html>
