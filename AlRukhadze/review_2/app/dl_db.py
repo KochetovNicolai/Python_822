@@ -31,3 +31,6 @@ class Deadline(db.Model):
 
     def get_deadlines(self):
         self.query.order_by(self.d_title).all()   # получаем list приближающихся дедлайнов
+
+
+db.create_all()
