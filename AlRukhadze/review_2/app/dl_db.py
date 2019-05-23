@@ -20,8 +20,8 @@ class Deadline(db.Model):
 
     # def __init__(self, title, details, date, time):
     def __init__(self, title, details):
-        self.d_title = title
-        self.d_details = details
+        self.d_title = title.strip()
+        self.d_details = details.strip()
         # self.d_date = date
         # self.d_time = time
 
@@ -29,5 +29,5 @@ class Deadline(db.Model):
         db.session.add(self)        # вызов add() добавляет объект
         db.session.commit()         # завершение транзакции
 
-    def get_deadlines(self):
-        self.query.order_by(self.d_title).all()   # получаем list приближающихся дедлайнов
+
+db.create_all()                     # создание бд по указанным параметрам

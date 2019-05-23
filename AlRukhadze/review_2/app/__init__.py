@@ -11,3 +11,4 @@ db = SQLAlchemy(app)
 db.create_all()
 
 from app import routes
+

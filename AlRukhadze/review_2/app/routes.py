@@ -34,26 +34,30 @@ def add_deadline():
     _date = request.form['date']
     _time = request.form['time']
 
-    if _title and _date and _time:
+    # if _title and _date and _time:
+    if _title:
         if _details:
             # new_deadline = Deadline(_title, _details, _date, _time)
             new_deadline = Deadline(_title, _details)
             Deadline.save_deadline(new_deadline)
-            return render_template('index.html')
+            list_of_deadlines = Deadline.query.all()  # получаем лист наших дедлайнов (объектов типа Deadline)
+            return render_template('show_deadlines.html', cur_list=list_of_deadlines)
             # тут добавляем в бд все поданные на ввод значения
         else:
             # new_deadline = Deadline(_title, 'NULL', _date, _time)
             new_deadline = Deadline(_title, 'NULL')
             Deadline.save_deadline(new_deadline)
-            return render_template('index.html')
+            list_of_deadlines = Deadline.query.all()  # получаем лист наших дедлайнов (объектов типа Deadline)
+            return render_template('show_deadlines.html', cur_list=list_of_deadlines)
             # тут добавляем в бд все поданные на ввод значения, но вместо details -- NULL
     else:
         return redirect('wrong_add')
         # переход на страницу с оповещением о некорректности ввода
 
 
-@app.route('/show_new')
+@app.route('/show_deadlines')
 def show_new():
-    list_of_deadlines = Deadline.get_deadlines()    # получаем лист наших дедлайнов (объектов типа Deadline)
-    list_of = [1, 2, 3]
-    return render_template('show_deadlines.html', cur_list=list_of)
+    list_of_deadlines = Deadline.query.all()    # получаем лист наших дедлайнов (объектов типа Deadline)
+    # list_of_titles = [str(list_of_deadlines.d_title)]
+    # list_of_details = [str(list_of_deadlines.d_details)]
+    return render_template('show_deadlines.html', cur_list=list_of_deadlines)

@@ -10,8 +10,7 @@
 	  <h1>Here are your upcoming deadlines:</h1>
 	    <div class="show_deadlines">
           {% for i in cur_list%}
-            <!-- <li>{{ i.d_title, i.d_details, i.d_date, i.d_time }} -->
-            <li>{{ i }}
+              <li>{{ str(i.d_title), str(i.d_details) }}</li>
           {% endfor %}
         </div>
 	</div>
